@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Construcción & Servicios ZF — Santiago de Chile</title>
+  <meta name="description" content="Empresa constructora en Santiago de Chile. Remodelaciones, pintura, soldadura, construcción general. +10 años de experiencia." />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <!-- DaisyUI -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/daisyui@5/themes.css" type="text/css" />
+  <!-- React -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <!-- Babel for JSX -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+    :root {
+      --color-primary: oklch(0.45 0.15 250);
+      --color-primary-content: #ffffff;
+      --color-secondary: oklch(0.72 0.11 75);
+      --color-secondary-content: #1c1c1e;
+      --color-base-100: #ffffff;
+      --color-base-200: #f7f3ed;
+      --color-base-300: #e8e0d4;
+      --color-base-content: #2d2a26;
+    }
+
+    * { font-family: 'Inter', system-ui, sans-serif; }
+
+    html { scroll-behavior: smooth; }
+
+    .section-animate {
+      animation: fadeInUp 0.6s ease-out;
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes bounce-slow {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+    .animate-bounce-slow { animation: bounce-slow 2s infinite; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #c8a45e55; border-radius: 3px; }
+  </style>
+</head>
+<body class="bg-white text-[#2d2a26]">
+  <div id="root"></div>
+
+  <script type="text/babel" data-type="module">
+    const { useState, useRef, useEffect, useCallback } = React;
+
+    // ========== DATOS MODIFICABLES ==========
+
+    const SERVICIOS = [
+      {
+        id: "remodelacion",
+        nombre: "Remodelación de Interiores",
+        descripcion: "Transformamos tus espacios con remodelaciones completas de cocinas, baños, dormitorios y living. Incluye demolición, obra gruesa, terminaciones y limpieza final.",
+        icono: "🏠",
+        unidad: "m²",
+        precioBase: 185000,
+        detalles: ["Demolición y retiro de escombros", "Instalaciones eléctricas y sanitarias", "Revestimientos y terminaciones", "Pintura y limpieza final"],
+        imagen: "https://912ec8c7ff.cbaul-cdnwnd.com/fbf05fcc8064ddefbfb57bdbcd633ca9/200000135-afcb5afcb6/1000183893-3.jpeg?ph=912ec8c7ff"
+      },
+      {
+        id: "pintura",
+        nombre: "Pintura General",
+        descripcion: "Servicio profesional de pintura para interiores y exteriores. Preparación de superficies, empaste, lijado y aplicación de pintura de primera calidad.",
+        icono: "🎨",
+        unidad: "m²",
+        precioBase: 12500,
+        detalles: ["Preparación y empaste de muros", "Lijado y aplicación de base", "Dos manos de pintura premium", "Protección de pisos y muebles"],
+        imagen: "https://912ec8c7ff.cbaul-cdnwnd.com/fbf05fcc8064ddefbfb57bdbcd633ca9/200000148-a18cba18cd/1000183894-77.jpeg?ph=912ec8c7ff"
+      },
+      {
+        id: "soldadura",
+        nombre: "Soldadura y Estructuras Metálicas",
+        descripcion: "Fabricación e instalación de estructuras metálicas, rejas, portones, escaleras, barandas y trabajos de soldadura en general.",
+        icono: "⚙️",
+        unidad: "proyecto",
+        precioBase: 350000,
+        detalles: ["Diseño y fabricación a medida", "Soldadura MIG/TIG certificada", "Tratamiento anticorrosivo", "Instalación y acabado final"],
+        imagen: "https://912ec8c7ff.cbaul-cdnwnd.com/fbf05fcc8064ddefbfb57bdbcd633ca9/200000151-8475d8475f/1000000981-2.jpeg?ph=912ec8c7ff"
+      },
+      {
+        id: "construccion",
+        nombre: "Construcción General",
+        descripcion: "Construcción de obras nuevas desde cimientos hasta terminaciones. Casas, ampliaciones, galpones, bodegas y proyectos comerciales.",
+        icono: "🏗️",
+        unidad: "m²",
+        precioBase: 420000,
+        detalles: ["Obra gruesa completa", "Instalaciones eléctricas y sanitarias", "Techumbres y terminaciones", "Gestión de permisos municipales"],
+        imagen: "https://912ec8c7ff.cbaul-cdnwnd.com/fbf05fcc8064ddefbfb57bdbcd633ca9/200000140-1021410216/1000183791-7.jpeg?ph=912ec8c7ff"
+      }
+    ];
+
+    const PORTFOLIO_IMAGES = [
+      "https://912ec8c7ff.cbaul-cdnwnd.com/fbf05fcc8064ddefbfb57bdbcd633ca9/200000135-afcb5afcb6/1000183893-3.jpeg?ph=912ec8c7ff",
+      "https://912ec8c7ff.cbaul-cdnwnd.com/fbf05fcc8064ddefbfb57bdbcd633ca9/200000136-dc7d2dc7d3/1000183790-7.jpeg?ph=912ec8c7ff",
+      "https://912ec8c7ff.cbaul-cdnwnd.com/fbf05fcc8064ddefbfb57bdbcd633ca9/200000137-4fa794fa7b/1000183796-2.jpeg?ph=912ec8c7ff",
+      "https://912ec8c7ff.cbaul-cdnwnd.com/fbf05fcc8064ddefbfb57bdbcd633ca9/200000138-5443c5443f/1000183797-1.jpeg?ph=912ec8c7ff",
+      "https://912ec8c7ff.cbaul-cdnwnd.com/fbf05fcc8064ddefbfb57bdbcd633ca9/200000140-1021410216/1000183791-7.jpeg?ph=912ec8c7ff",
+      "https://912ec8c7ff.cbaul-cdnwnd.com/fbf05fcc8064ddefbfb57bdbcd633ca9/200000145-c03dcc03de/1000183794-1.jpeg?ph=912ec8c7ff",
+      "https://912ec8c7ff.cbaul-cdnwnd.com/fbf05fcc8064ddefbfb57bdbcd633ca9/200000146-cf3d6cf3d7/1000183795-6.jpeg?ph=912ec8c7ff",
+      "https://912ec8c7ff.cbaul-cdnwnd.com/fbf05fcc8064ddefbfb57bdbcd633ca9/200000147-6b9fa6b9fc/1000183896-0.jpeg?ph=912ec8c7ff",
+      "https://912ec8c7ff.cbaul-cdnwnd.com/fbf05fcc8064ddefbfb57bdbcd633ca9/200000148-a18cba18cd/1000183894-77.jpeg?ph=912ec8c7ff",
+      "https://912ec8c7ff.cbaul-cdnwnd.com/fbf05fcc8064ddefbfb57bdbcd633ca9/200000155-2183521838/1000001012.jpeg?ph=912ec8c7ff",
+      "https://912ec8c7ff.cbaul-cdnwnd.com/fbf05fcc8064ddefbfb57bdbcd633ca9/200000157-0b2470b248/1000000966-3.jpeg?ph=912ec8c7ff",
+      "https://912ec8c7ff.cbaul-cdnwnd.com/fbf05fcc8064ddefbfb57bdbcd633ca9/200000159-aea4daea4e/1000000666-0.jpeg?ph=912ec8c7ff",
+      "https://912ec8c7ff.cbaul-cdnwnd.com/fbf05fcc8064ddefbfb57bdbcd633ca9/200000161-05f7005f72/1000000453-4.jpeg?ph=912ec8c7ff",
+      "https://912ec8c7ff.cbaul-cdnwnd.com/fbf05fcc8064ddefbfb57bdbcd633ca9/200000163-31fa731fa9/1000000468-2.jpeg?ph=912ec8c7ff",
+      "https://912ec8c7ff.cbaul-cdnwnd.com/fbf05fcc8064ddefbfb57bdbcd633ca9/200000165-924dd924df/1000000435-3.jpeg?ph=912ec8c7ff",
+      "https://912ec8c7ff.cbaul-cdnwnd.com/fbf05fcc8064ddefbfb57bdbcd633ca9/200000167-a2799a27a2/1000000401-7.jpeg?ph=912ec8c7ff"
+    ];
+
+    const FAQ_ITEMS = [
+      { pregunta: "¿En qué zonas trabajan?", respuesta: "Estamos ubicados en la Región Metropolitana de Santiago, pero aceptamos proyectos a lo largo de todo Chile. Para proyectos fuera de la RM, evaluamos caso a caso." },
+      { pregunta: "¿Cuánto demora un proyecto?", respuesta: "Depende del tipo y tamaño del proyecto. Una remodelación de baño puede tomar 2-3 semanas. Una construcción completa puede tomar 3-6 meses. Te damos un plazo estimado en el presupuesto." },
+      { pregunta: "¿Ofrecen garantía?", respuesta: "Sí, todos nuestros trabajos tienen garantía. La duración depende del tipo de servicio: pintura (1 año), remodelaciones (2 años), construcción (5 años en estructura)." },
+      { pregunta: "¿Cómo es el proceso de contratación?", respuesta: "1) Nos contactas y nos cuentas tu proyecto. 2) Visitamos el lugar para evaluar. 3) Te enviamos un presupuesto detallado. 4) Si aceptas, firmamos contrato y comenzamos. 5) Pago en etapas según avance." }
+    ];
+
+    const COMUNAS_SANTIAGO = [
+      "Santiago Centro", "Providencia", "Las Condes", "Vitacura", "Lo Barnechea",
+      "Ñuñoa", "La Reina", "Peñalolén", "Macul", "San Joaquín",
+      "La Florida", "Puente Alto", "La Granja", "San Ramón", "San Miguel",
+      "La Cisterna", "El Bosque", "Pedro Aguirre Cerda", "Lo Espejo", "Cerrillos",
+      "Maipú", "Estación Central", "Cerro Navia", "Lo Prado", "Pudahuel",
+      "Quinta Normal", "Renca", "Independencia", "Recoleta", "Conchalí",
+      "Huechuraba", "Quilicura", "Colina", "Lampa", "Buin",
+      "San Bernardo", "Padre Hurtado", "Peñaflor", "Talagante", "Otra comuna/región"
+    ];
+
+    // ========== HELPERS ==========
+    function formatCLP(n) { return "$" + n.toLocaleString("es-CL"); }
+    function genId() { return Math.random().toString(36).slice(2, 10); }
+
+    // ========== SVG ICONS (inline, no lucide dependency) ==========
+    const IconMenu = () => <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>;
+    const IconX = ({size=20}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>;
+    const IconSend = ({size=16}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/><path d="m21.854 2.147-10.94 10.939"/></svg>;
+    const IconMessageCircle = ({size=28}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>;
+    const IconCheck = ({size=14}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>;
+    const IconChevronLeft = ({size=28}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>;
+    const IconChevronRight = ({size=28}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>;
+    const IconMapPin = ({size=20}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>;
+    const IconMail = ({size=20}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>;
+    const IconAward = ({size=28}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15.477 12.89 1.515 8.526a.5.5 0 0 1-.81.47l-3.58-2.687a1 1 0 0 0-1.197 0l-3.586 2.686a.5.5 0 0 1-.81-.469l1.514-8.526"/><circle cx="12" cy="8" r="6"/></svg>;
+    const IconUsers = ({size=28}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 21a8 8 0 0 0-16 0"/><circle cx="10" cy="8" r="5"/><path d="M22 20c0-3.37-2-6.5-4-8a5 5 0 0 0-.45-8.3"/></svg>;
+    const IconClock = ({size=28}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>;
+    const IconShield = ({size=28}) => <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg>;
+
+    // ========== NAVBAR ==========
+    const NAV_ITEMS = [
+      { id: "inicio", label: "Inicio" },
+      { id: "servicios", label: "Servicios" },
+      { id: "portafolio", label: "Portafolio" },
+      { id: "nosotros", label: "Nosotros" },
+      { id: "contacto", label: "Contacto" },
+    ];
+
+    function Navbar({ activeSection, onNavigate }) {
+      const [open, setOpen] = useState(false);
+      const handleNav = (id) => { onNavigate(id); setOpen(false); };
+
+      return (
+        <div className="bg-white/90 backdrop-blur-md sticky top-0 z-50 shadow-sm border-b border-[#e8e0d4]/50 px-4">
+          <div className="max-w-6xl mx-auto flex items-center justify-between h-16">
+            <button onClick={() => handleNav("inicio")} className="text-lg font-bold tracking-wide flex items-center gap-2 hover:opacity-80 transition-opacity">
+              <span className="text-2xl">🏗️</span>
+              <span className="text-[#2d2a26]">Construcción <span className="text-[#1e40af]">&amp;</span> Servicios ZF</span>
+            </button>
+
+            <div className="hidden md:flex">
+              <ul className="flex gap-1">
+                {NAV_ITEMS.map(item => (
+                  <li key={item.id}>
+                    <button onClick={() => handleNav(item.id)} className={`px-3 py-2 rounded-lg font-medium transition-colors ${activeSection === item.id ? "text-[#1e40af] font-bold" : "text-[#2d2a26]/70 hover:text-[#1e40af]"}`}>
+                      {item.label}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="md:hidden">
+              <button className="p-2" onClick={() => setOpen(!open)}>
+                {open ? <IconX size={22} /> : <IconMenu />}
+              </button>
+            </div>
+          </div>
+
+          {open && (
+            <div className="absolute top-full left-0 right-0 bg-white shadow-xl md:hidden z-50 border-b border-[#e8e0d4]">
+              <ul className="p-2">
+                {NAV_ITEMS.map(item => (
+                  <li key={item.id}>
+                    <button onClick={() => handleNav(item.id)} className={`w-full text-left px-4 py-3 rounded-lg font-medium ${activeSection === item.id ? "text-[#1e40af] font-bold" : "text-[#2d2a26]/70"}`}>
+                      {item.label}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // ========== HERO ==========
+    function Hero({ onNavigate, onOpenChat }) {
+      return (
+        <div className="min-h-[85vh] relative overflow-hidden flex items-center justify-center">
+          <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('https://912ec8c7ff.cbaul-cdnwnd.com/fbf05fcc8064ddefbfb57bdbcd633ca9/200000140-1021410216/1000183791-7.jpeg?ph=912ec8c7ff')" }} />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#1a2332]/85 via-[#1e40af]/60 to-[#1a2332]/90" />
+          <div className="text-center relative z-10 px-4 max-w-2xl">
+            <div className="mb-6">
+              <span className="inline-block bg-[#c8a45e]/90 text-white font-semibold tracking-wider px-5 py-2.5 rounded-full text-sm shadow-md">
+                +10 AÑOS DE EXPERIENCIA
+              </span>
+            </div>
+            <h1 className="text-4xl md:text-6xl font-extrabold text-white leading-tight mb-6">
+              Hacemos de tu idea <span className="text-[#c8a45e]">una realidad</span>
+            </h1>
+            <p className="text-lg md:text-xl text-white/75 mb-4 max-w-xl mx-auto">
+              Más allá de muros o reparaciones, construimos sueños. Empresa constructora en <strong className="text-white">Santiago de Chile</strong> especializada en construcción, remodelaciones, soldadura y más.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center mt-8">
+              <button onClick={onOpenChat} className="px-8 py-3 rounded-lg font-semibold shadow-lg bg-white text-[#1e40af] hover:bg-[#f7f3ed] transition-colors text-lg">
+                💬 Solicitar Presupuesto
+              </button>
+              <button onClick={() => onNavigate("servicios")} className="px-8 py-3 rounded-lg font-semibold border-2 border-white/40 text-white hover:bg-white/15 hover:border-white/60 transition-colors text-lg">
+                Ver Servicios
+              </button>
+            </div>
+            <div className="mt-12 flex flex-wrap justify-center gap-6 text-white/65">
+              <div className="flex items-center gap-2"><span className="text-2xl">📍</span><span className="text-sm">Santiago, Chile</span></div>
+              <div className="flex items-center gap-2"><span className="text-2xl">✅</span><span className="text-sm">Proyectos a todo Chile</span></div>
+              <div className="flex items-center gap-2"><span className="text-2xl">🏆</span><span className="text-sm">Garantía en todos los trabajos</span></div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ========== SERVICES ==========
+    function Services({ onOpenChat }) {
+      return (
+        <section className="py-16 px-4 bg-white">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-12">
+              <span className="inline-block bg-[#1e40af]/10 text-[#1e40af] font-semibold text-sm px-4 py-1.5 rounded-full mb-3">NUESTROS SERVICIOS</span>
+              <h2 className="text-3xl md:text-4xl font-bold text-[#2d2a26] mb-3">Soluciones profesionales para tu proyecto</h2>
+              <p className="text-[#2d2a26]/55 max-w-2xl mx-auto">Ofrecemos una amplia gama de servicios de construcción y remodelación con los más altos estándares de calidad.</p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {SERVICIOS.map(s => (
+                <div key={s.id} className="bg-[#f7f3ed]/60 border border-[#e8e0d4]/60 rounded-lg hover:shadow-lg hover:border-[#1e40af]/20 transition-all duration-300 overflow-hidden group">
+                  <div className="h-48 overflow-hidden">
+                    <img src={s.imagen} alt={s.nombre} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                  </div>
+                  <div className="p-5">
+                    <div className="flex items-start justify-between">
+                      <h3 className="text-lg font-bold text-[#2d2a26] flex items-center gap-2"><span className="text-2xl">{s.icono}</span>{s.nombre}</h3>
+                    </div>
+                    <p className="text-[#2d2a26]/55 text-sm mt-2">{s.descripcion}</p>
+                    <div className="mt-3 space-y-1">
+                      {s.detalles.map((d, i) => (
+                        <div key={i} className="flex items-center gap-2 text-sm text-[#2d2a26]/65">
+                          <span className="text-[#1e40af] shrink-0"><IconCheck /></span>
+                          <span>{d}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex justify-between items-center mt-4 pt-3 border-t border-[#e8e0d4]/60">
+                      <div>
+                        <span className="text-xl font-bold text-[#1e40af]">{formatCLP(s.precioBase)}</span>
+                        <span className="text-[#2d2a26]/45 text-sm ml-1">/ {s.unidad}</span>
+                      </div>
+                      <button onClick={onOpenChat} className="px-4 py-2 rounded-lg bg-[#1e40af] text-white font-medium text-sm hover:bg-[#1e40af]/90 transition-colors">Cotizar</button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      );
+    }
+
+    // ========== PORTFOLIO ==========
+    function Portfolio() {
+      const [selected, setSelected] = useState(null);
+      const prev = () => setSelected(s => s !== null ? (s - 1 + PORTFOLIO_IMAGES.length) % PORTFOLIO_IMAGES.length : null);
+      const next = () => setSelected(s => s !== null ? (s + 1) % PORTFOLIO_IMAGES.length : null);
+
+      return (
+        <section className="py-16 px-4 bg-[#f7f3ed]">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-12">
+              <span className="inline-block bg-[#1e40af]/10 text-[#1e40af] font-semibold text-sm px-4 py-1.5 rounded-full mb-3">PORTAFOLIO</span>
+              <h2 className="text-3xl md:text-4xl font-bold text-[#2d2a26] mb-3">Nuestro Trabajo</h2>
+              <p className="text-[#2d2a26]/55 max-w-2xl mx-auto">Más de 10 años construyendo sueños. Conoce algunos de nuestros proyectos completados en Santiago y el resto de Chile.</p>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+              {PORTFOLIO_IMAGES.map((img, i) => (
+                <div key={i} className="aspect-square overflow-hidden rounded-xl cursor-pointer group relative shadow-sm hover:shadow-md transition-shadow" onClick={() => setSelected(i)}>
+                  <img src={img} alt={`Proyecto ${i+1}`} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" loading="lazy" />
+                  <div className="absolute inset-0 bg-[#1e40af]/0 group-hover:bg-[#1e40af]/30 transition-colors duration-300 flex items-center justify-center">
+                    <span className="text-white opacity-0 group-hover:opacity-100 transition-opacity font-medium text-sm bg-[#1e40af]/60 px-3 py-1 rounded-full">Ver imagen</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {selected !== null && (
+            <div className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4" onClick={() => setSelected(null)}>
+              <button className="absolute top-4 right-4 p-2 text-white hover:bg-white/10 rounded-full" onClick={() => setSelected(null)}><IconX size={24} /></button>
+              <button className="absolute left-2 md:left-6 p-2 text-white hover:bg-white/10 rounded-full" onClick={(e) => { e.stopPropagation(); prev(); }}><IconChevronLeft /></button>
+              <img src={PORTFOLIO_IMAGES[selected]} alt={`Proyecto ${selected+1}`} className="max-h-[85vh] max-w-[90vw] object-contain rounded-lg shadow-2xl" onClick={(e) => e.stopPropagation()} />
+              <button className="absolute right-2 md:right-6 p-2 text-white hover:bg-white/10 rounded-full" onClick={(e) => { e.stopPropagation(); next(); }}><IconChevronRight /></button>
+              <div className="absolute bottom-4 text-white/60 text-sm">{selected+1} / {PORTFOLIO_IMAGES.length}</div>
+            </div>
+          )}
+        </section>
+      );
+    }
+
+    // ========== ABOUT ==========
+    function About() {
+      const stats = [
+        { icon: <IconClock />, value: "+10", label: "Años de experiencia" },
+        { icon: <IconUsers />, value: "+500", label: "Proyectos completados" },
+        { icon: <IconAward />, value: "100%", label: "Compromiso" },
+        { icon: <IconShield />, value: "5 años", label: "Garantía estructural" },
+      ];
+
+      return (
+        <section className="py-16 px-4 bg-white">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-12">
+              <span className="inline-block bg-[#1e40af]/10 text-[#1e40af] font-semibold text-sm px-4 py-1.5 rounded-full mb-3">SOBRE NOSOTROS</span>
+              <h2 className="text-3xl md:text-4xl font-bold text-[#2d2a26] mb-3">Construcción & Servicios ZF</h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center mb-12">
+              <div>
+                <img src="https://912ec8c7ff.cbaul-cdnwnd.com/fbf05fcc8064ddefbfb57bdbcd633ca9/200000081-aead9aeadb/1000183641-1.jpeg?ph=912ec8c7ff" alt="Equipo ZF" className="rounded-xl shadow-lg w-full object-cover h-72 md:h-96" loading="lazy" />
+              </div>
+              <div className="space-y-4">
+                <p className="text-[#2d2a26]/75 leading-relaxed">Somos una empresa constructora con <strong className="text-[#2d2a26]">más de 10 años de experiencia</strong> en el rubro de la construcción general y servicios relacionados. Nos enfocamos en ofrecer un servicio de alta calidad, cumpliendo con los plazos establecidos y superando las expectativas de nuestros clientes.</p>
+                <p className="text-[#2d2a26]/75 leading-relaxed">Ubicados en la <strong className="text-[#2d2a26]">Región Metropolitana de Santiago</strong>, esto no es una limitante ya que aceptamos proyectos a lo largo de todo Chile. Ofrecemos servicios a clientes de diferentes sectores y tamaños.</p>
+                <p className="text-[#2d2a26]/75 leading-relaxed">Nuestro equipo altamente calificado y comprometido nos permite brindar proyectos de alta calidad tratando cada proyecto como si fuera propio.</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {stats.map((s, i) => (
+                <div key={i} className="bg-[#f7f3ed]/70 border border-[#e8e0d4]/50 text-center p-6 rounded-lg hover:shadow-md transition-shadow">
+                  <div className="text-[#1e40af] mx-auto mb-2 flex justify-center">{s.icon}</div>
+                  <div className="text-2xl font-bold text-[#2d2a26]">{s.value}</div>
+                  <div className="text-sm text-[#2d2a26]/55">{s.label}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      );
+    }
+
+    // ========== CONTACT ==========
+    function Contact({ onOpenChat }) {
+      const [openFaq, setOpenFaq] = useState(null);
+      const [form, setForm] = useState({ nombre: "", email: "", telefono: "", mensaje: "" });
+      const [sent, setSent] = useState(false);
+
+      const handleSubmit = (e) => {
+        e.preventDefault();
+        setSent(true);
+        setTimeout(() => setSent(false), 4000);
+        setForm({ nombre: "", email: "", telefono: "", mensaje: "" });
+      };
+
+      return (
+        <section className="py-16 px-4 bg-[#f7f3ed]">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-12">
+              <span className="inline-block bg-[#1e40af]/10 text-[#1e40af] font-semibold text-sm px-4 py-1.5 rounded-full mb-3">CONTACTO</span>
+              <h2 className="text-3xl md:text-4xl font-bold text-[#2d2a26] mb-3">¿Tienes un proyecto en mente?</h2>
+              <p className="text-[#2d2a26]/55 max-w-2xl mx-auto">Contáctanos y te responderemos a la brevedad. También puedes usar nuestro asistente virtual para una cotización rápida.</p>
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="bg-white shadow-sm border border-[#e8e0d4]/50 rounded-lg p-6">
+                <h3 className="text-lg font-bold text-[#2d2a26] mb-4 flex items-center gap-2">
+                  <span className="text-[#1e40af]"><IconSend size={20} /></span> Envíanos un mensaje
+                </h3>
+                {sent && <div className="bg-green-50 border border-green-200 text-green-700 text-sm p-3 rounded-lg mb-3">✅ ¡Mensaje enviado! Te contactaremos pronto.</div>}
+                <form onSubmit={handleSubmit} className="space-y-3">
+                  <input type="text" placeholder="Tu nombre" className="w-full px-4 py-3 rounded-lg border border-[#e8e0d4] bg-[#f7f3ed]/50 focus:outline-none focus:border-[#1e40af] transition-colors" value={form.nombre} onChange={e => setForm({...form, nombre: e.target.value})} required />
+                  <input type="email" placeholder="Tu email" className="w-full px-4 py-3 rounded-lg border border-[#e8e0d4] bg-[#f7f3ed]/50 focus:outline-none focus:border-[#1e40af] transition-colors" value={form.email} onChange={e => setForm({...form, email: e.target.value})} required />
+                  <input type="tel" placeholder="Tu teléfono" className="w-full px-4 py-3 rounded-lg border border-[#e8e0d4] bg-[#f7f3ed]/50 focus:outline-none focus:border-[#1e40af] transition-colors" value={form.telefono} onChange={e => setForm({...form, telefono: e.target.value})} />
+                  <textarea placeholder="Cuéntanos sobre tu proyecto..." className="w-full px-4 py-3 rounded-lg border border-[#e8e0d4] bg-[#f7f3ed]/50 focus:outline-none focus:border-[#1e40af] transition-colors h-28 resize-none" value={form.mensaje} onChange={e => setForm({...form, mensaje: e.target.value})} required />
+                  <button type="submit" className="w-full py-3 rounded-lg bg-[#1e40af] text-white font-semibold hover:bg-[#1e40af]/90 transition-colors">Enviar mensaje</button>
+                </form>
+              </div>
+
+              <div className="space-y-6">
+                <div className="bg-white shadow-sm border border-[#e8e0d4]/50 rounded-lg p-6 space-y-3">
+                  <div className="flex items-center gap-3">
+                    <div className="bg-[#1e40af]/10 rounded-full p-2.5"><IconMapPin /></div>
+                    <div><p className="font-semibold text-[#2d2a26]">Ubicación</p><p className="text-sm text-[#2d2a26]/55">Santiago, Región Metropolitana, Chile</p></div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="bg-[#1e40af]/10 rounded-full p-2.5"><IconMail /></div>
+                    <div><p className="font-semibold text-[#2d2a26]">Email</p><p className="text-sm text-[#2d2a26]/55">construcctorayservicios@gmail.com</p></div>
+                  </div>
+                  <button onClick={onOpenChat} className="w-full py-3 rounded-lg border-2 border-[#1e40af] text-[#1e40af] font-semibold hover:bg-[#1e40af]/5 transition-colors mt-2">💬 Chatear con nuestro asistente</button>
+                </div>
+
+                <div className="bg-white shadow-sm border border-[#e8e0d4]/50 rounded-lg p-6">
+                  <h3 className="text-lg font-bold text-[#2d2a26] mb-3">Preguntas Frecuentes</h3>
+                  <div className="space-y-2">
+                    {FAQ_ITEMS.map((faq, i) => (
+                      <div key={i} className="border border-[#e8e0d4]/40 rounded-lg overflow-hidden">
+                        <button onClick={() => setOpenFaq(openFaq === i ? null : i)} className="w-full text-left px-4 py-3 font-medium text-sm text-[#2d2a26] bg-[#f7f3ed]/70 hover:bg-[#f7f3ed] transition-colors flex justify-between items-center">
+                          {faq.pregunta}
+                          <span className="text-[#2d2a26]/40">{openFaq === i ? "−" : "+"}</span>
+                        </button>
+                        {openFaq === i && <div className="px-4 py-3 text-sm text-[#2d2a26]/65 bg-white">{faq.respuesta}</div>}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      );
+    }
+
+    // ========== FOOTER ==========
+    function Footer({ onNavigate }) {
+      return (
+        <footer className="bg-[#1a2332] text-[#c8c4bb]">
+          <div className="max-w-6xl mx-auto px-4 py-10">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div>
+                <h3 className="text-lg font-bold mb-3 text-white">🏗️ Construcción & Servicios ZF</h3>
+                <p className="text-[#8a8680] text-sm leading-relaxed">Más de 10 años construyendo sueños en Santiago de Chile y todo el país. Calidad, compromiso y profesionalismo en cada proyecto.</p>
+              </div>
+              <div>
+                <h4 className="font-semibold mb-3 text-white">Navegación</h4>
+                <ul className="space-y-1 text-sm">
+                  {["inicio","servicios","portafolio","nosotros","contacto"].map(s => (
+                    <li key={s}><button onClick={() => onNavigate(s)} className="text-[#8a8680] hover:text-[#c8a45e] transition-colors capitalize">{s}</button></li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h4 className="font-semibold mb-3 text-white">Contacto</h4>
+                <ul className="space-y-2 text-sm text-[#8a8680]">
+                  <li>📍 Santiago, Región Metropolitana</li>
+                  <li>📧 construcctorayservicios@gmail.com</li>
+                  <li>📱 WhatsApp: Próximamente</li>
+                  <li>📷 @Construccionyservicioszf.cl</li>
+                </ul>
+              </div>
+            </div>
+            <div className="border-t border-white/10 mt-8 pt-6 text-center text-sm text-[#6a665f]">
+              © {new Date().getFullYear()} Construcción & Servicios ZF — Todos los derechos reservados.
+            </div>
+          </div>
+        </footer>
+      );
+    }
+
+    // ========== CHATBOT ==========
+    function Chatbot({ isOpen, onToggle }) {
+      const [messages, setMessages] = useState([]);
+      const [step, setStep] = useState("welcome");
+      const [inputValue, setInputValue] = useState("");
+      const [budget, setBudget] = useState({ servicio: "", cantidad: 0, nombre: "", telefono: "", email: "", descripcion: "", comuna: "" });
+      const [typing, setTyping] = useState(false);
+      const messagesEndRef = useRef(null);
+      const initialized = useRef(false);
+      const budgetRef = useRef(budget);
+      budgetRef.current = budget;
+
+      const scrollToBottom = () => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); };
+      useEffect(() => { scrollToBottom(); }, [messages, typing]);
+
+      const addBotMessage = useCallback((text, options) => {
+        setTyping(true);
+        setTimeout(() => {
+          setTyping(false);
+          setMessages(prev => [...prev, { id: genId(), sender: "bot", text, options, timestamp: new Date() }]);
+        }, 600);
+      }, []);
+
+      const addUserMessage = useCallback((text) => {
+        setMessages(prev => [...prev, { id: genId(), sender: "user", text, timestamp: new Date() }]);
+      }, []);
+
+      useEffect(() => {
+        if (isOpen && !initialized.current) {
+          initialized.current = true;
+          addBotMessage("👋 ¡Hola! Soy el asistente virtual de **Construcción & Servicios ZF**. ¿En qué puedo ayudarte hoy?", [
+            { label: "Solicitar presupuesto", value: "presupuesto", emoji: "💰" },
+            { label: "Ver servicios", value: "servicios", emoji: "🔧" },
+            { label: "Preguntas frecuentes", value: "faq", emoji: "❓" },
+            { label: "Hablar con un asesor", value: "asesor", emoji: "👤" },
+          ]);
+          setStep("menu");
+        }
+      }, [isOpen, addBotMessage]);
+
+      const handleMenuChoice = useCallback((value) => {
+        switch (value) {
+          case "presupuesto":
+            addBotMessage("¡Genial! Vamos a preparar tu presupuesto. Primero, ¿qué servicio necesitas?",
+              SERVICIOS.map(s => ({ label: `${s.icono} ${s.nombre}`, value: s.id }))
+            );
+            setStep("select_service");
+            break;
+          case "servicios":
+            let msg = "📋 **Nuestros servicios:**\n\n";
+            SERVICIOS.forEach(s => { msg += `${s.icono} **${s.nombre}**\n${formatCLP(s.precioBase)} por ${s.unidad}\n\n`; });
+            msg += "¿Te gustaría cotizar alguno de estos servicios?";
+            addBotMessage(msg, [
+              { label: "Sí, quiero cotizar", value: "presupuesto", emoji: "💰" },
+              { label: "Volver al menú", value: "volver_menu", emoji: "↩️" },
+            ]);
+            setStep("faq_answer");
+            break;
+          case "faq":
+            addBotMessage("¿Qué te gustaría saber?", FAQ_ITEMS.map((f, i) => ({ label: f.pregunta, value: `faq_${i}`, emoji: "📌" })));
+            setStep("faq_menu");
+            break;
+          case "asesor":
+            addBotMessage("📞 Puedes contactar a nuestro equipo directamente:\n\n📧 **Email:** construcctorayservicios@gmail.com\n📷 **Instagram:** @Construccionyservicioszf.cl\n\n📱 **WhatsApp:** Próximamente\n\nTe responderemos a la brevedad. ¿Hay algo más en lo que pueda ayudarte?", [
+              { label: "Solicitar presupuesto", value: "presupuesto", emoji: "💰" },
+              { label: "Volver al menú", value: "volver_menu", emoji: "↩️" },
+            ]);
+            setStep("faq_answer");
+            break;
+          case "volver_menu":
+            addBotMessage("¿En qué más puedo ayudarte?", [
+              { label: "Solicitar presupuesto", value: "presupuesto", emoji: "💰" },
+              { label: "Ver servicios", value: "servicios", emoji: "🔧" },
+              { label: "Preguntas frecuentes", value: "faq", emoji: "❓" },
+              { label: "Hablar con un asesor", value: "asesor", emoji: "👤" },
+            ]);
+            setStep("menu");
+            break;
+          default:
+            addBotMessage("No entendí. Por favor selecciona una opción.", [
+              { label: "Solicitar presupuesto", value: "presupuesto", emoji: "💰" },
+              { label: "Volver al menú", value: "volver_menu", emoji: "↩️" },
+            ]);
+            setStep("menu");
+        }
+      }, [addBotMessage]);
+
+      const processInput = useCallback((value) => {
+        // We need step via a ref to avoid stale closures
+        const currentStep = stepRef.current;
+        const currentBudget = budgetRef.current;
+
+        switch (currentStep) {
+          case "menu":
+          case "faq_answer":
+            handleMenuChoice(value);
+            break;
+          case "faq_menu":
+            if (value.startsWith("faq_")) {
+              const idx = parseInt(value.split("_")[1]);
+              const faq = FAQ_ITEMS[idx];
+              if (faq) {
+                addBotMessage(`📌 **${faq.pregunta}**\n\n${faq.respuesta}\n\n¿Necesitas algo más?`, [
+                  { label: "Otra pregunta", value: "faq", emoji: "❓" },
+                  { label: "Solicitar presupuesto", value: "presupuesto", emoji: "💰" },
+                  { label: "Volver al menú", value: "volver_menu", emoji: "↩️" },
+                ]);
+                setStep("faq_answer");
+              }
+            } else { handleMenuChoice(value); }
+            break;
+          case "select_service":
+            const servicio = SERVICIOS.find(s => s.id === value);
+            if (servicio) {
+              setBudget(prev => ({ ...prev, servicio: servicio.id }));
+              const unitLabel = servicio.unidad === "m²" ? "¿Cuántos metros cuadrados (m²) aproximados necesitas?" : servicio.unidad === "ml" ? "¿Cuántos metros lineales aproximados necesitas?" : "¿Cuántos proyectos/unidades necesitas? (escribe 1 si es un solo trabajo)";
+              addBotMessage(`✅ **${servicio.nombre}** — ${formatCLP(servicio.precioBase)}/${servicio.unidad}\n\n${unitLabel}\n\n💡 *Escribe un número aproximado, no te preocupes si no es exacto.*`);
+              setStep("ask_cantidad");
+            } else {
+              addBotMessage("No encontré ese servicio. Selecciona una opción:", SERVICIOS.map(s => ({ label: `${s.icono} ${s.nombre}`, value: s.id })));
+            }
+            break;
+          case "ask_cantidad":
+            const num = parseFloat(value.replace(/[^\d.,]/g, "").replace(",", "."));
+            if (isNaN(num) || num <= 0) { addBotMessage("⚠️ Por favor ingresa un número válido mayor a 0. Por ejemplo: 25"); return; }
+            setBudget(prev => ({ ...prev, cantidad: num }));
+            addBotMessage(`📐 Perfecto, ${num} ${SERVICIOS.find(s => s.id === currentBudget.servicio)?.unidad || "unidades"}.\n\n¿En qué comuna de Santiago se realizaría el trabajo?`,
+              COMUNAS_SANTIAGO.slice(0, 8).map(c => ({ label: c, value: c }))
+            );
+            setStep("ask_comuna");
+            break;
+          case "ask_comuna":
+            setBudget(prev => ({ ...prev, comuna: value }));
+            addBotMessage(`📍 **${value}**, anotado.\n\n¿Puedes darnos una breve descripción del trabajo que necesitas?`);
+            setStep("ask_descripcion");
+            break;
+          case "ask_descripcion":
+            setBudget(prev => ({ ...prev, descripcion: value }));
+            addBotMessage("👤 ¿Cuál es tu nombre completo?");
+            setStep("ask_nombre");
+            break;
+          case "ask_nombre":
+            setBudget(prev => ({ ...prev, nombre: value }));
+            addBotMessage("📱 ¿Tu número de teléfono? (para contactarte con el presupuesto)");
+            setStep("ask_telefono");
+            break;
+          case "ask_telefono":
+            setBudget(prev => ({ ...prev, telefono: value }));
+            addBotMessage("📧 Por último, ¿tu correo electrónico? (escribe 'no' si prefieres no darlo)");
+            setStep("ask_email");
+            break;
+          case "ask_email":
+            const email = value.toLowerCase() === "no" ? "No proporcionado" : value;
+            // Use functional update to get latest budget
+            setBudget(prev => {
+              const updated = { ...prev, email };
+              const srv = SERVICIOS.find(s => s.id === updated.servicio);
+              if (!srv) return updated;
+              const subtotal = srv.precioBase * updated.cantidad;
+              const iva = Math.round(subtotal * 0.19);
+              const total = subtotal + iva;
+              const resumen = `🧾 **PRESUPUESTO ESTIMADO**\n━━━━━━━━━━━━━━━━━━━━━━\n\n🔧 **Servicio:** ${srv.nombre}\n📐 **Cantidad:** ${updated.cantidad} ${srv.unidad}\n💲 **Precio unitario:** ${formatCLP(srv.precioBase)}/${srv.unidad}\n📍 **Comuna:** ${updated.comuna}\n\n━━━━━━━━━━━━━━━━━━━━━━\n**Subtotal:** ${formatCLP(subtotal)}\n**IVA (19%):** ${formatCLP(iva)}\n**💰 TOTAL ESTIMADO: ${formatCLP(total)}**\n━━━━━━━━━━━━━━━━━━━━━━\n\n👤 **Cliente:** ${updated.nombre}\n📱 **Teléfono:** ${updated.telefono}\n📧 **Email:** ${email}\n📝 **Descripción:** ${updated.descripcion}\n\n⚠️ *Este es un presupuesto estimado. El precio final puede variar según la visita técnica al lugar del proyecto.*\n\n¿Qué te gustaría hacer?`;
+              addBotMessage(resumen, [
+                { label: "📞 Contactar por WhatsApp", value: "whatsapp", emoji: "📱" },
+                { label: "📧 Enviar por email", value: "email_budget", emoji: "📧" },
+                { label: "Nueva cotización", value: "nueva", emoji: "🔄" },
+                { label: "Volver al menú", value: "volver_menu", emoji: "↩️" },
+              ]);
+              return updated;
+            });
+            setStep("show_budget");
+            break;
+          case "show_budget":
+          case "goodbye":
+            if (value === "whatsapp") {
+              addBotMessage("📱 **WhatsApp aún no configurado.**\n\nPronto habilitaremos este canal. Por ahora puedes escribirnos a:\n📧 construcctorayservicios@gmail.com\n\n¿Algo más?", [
+                { label: "Nueva cotización", value: "nueva", emoji: "🔄" },
+                { label: "Volver al menú", value: "volver_menu", emoji: "↩️" },
+              ]);
+              setStep("goodbye");
+            } else if (value === "email_budget") {
+              addBotMessage("📧 ¡Listo! Hemos registrado tu solicitud. Nuestro equipo te contactará dentro de las próximas **24 horas hábiles** con un presupuesto detallado.\n\n¿Algo más?", [
+                { label: "Nueva cotización", value: "nueva", emoji: "🔄" },
+                { label: "Volver al menú", value: "volver_menu", emoji: "↩️" },
+              ]);
+              setStep("goodbye");
+            } else if (value === "nueva") {
+              setBudget({ servicio: "", cantidad: 0, nombre: "", telefono: "", email: "", descripcion: "", comuna: "" });
+              handleMenuChoice("presupuesto");
+            } else { handleMenuChoice(value); }
+            break;
+          default:
+            addBotMessage("No entendí tu mensaje. ¿Puedes intentar de nuevo?");
+        }
+      }, [addBotMessage, handleMenuChoice]);
+
+      const stepRef = useRef(step);
+      stepRef.current = step;
+
+      const handleOption = (opt) => { addUserMessage(opt.label); setTimeout(() => processInput(opt.value), 50); };
+      const handleTextSubmit = () => {
+        if (!inputValue.trim()) return;
+        const val = inputValue.trim();
+        addUserMessage(val);
+        setInputValue("");
+        setTimeout(() => processInput(val), 50);
+      };
+
+      const showInput = ["ask_cantidad","ask_comuna","ask_descripcion","ask_nombre","ask_telefono","ask_email"].includes(step);
+
+      const renderText = (text) => {
+        const parts = text.split(/(\*\*.*?\*\*)/g);
+        return parts.map((part, i) => {
+          if (part.startsWith("**") && part.endsWith("**")) return <strong key={i} className="font-bold">{part.slice(2,-2)}</strong>;
+          const ip = part.split(/(\*.*?\*)/g);
+          return ip.map((p, j) => {
+            if (p.startsWith("*") && p.endsWith("*") && !p.startsWith("**")) return <em key={`${i}-${j}`} className="italic opacity-50">{p.slice(1,-1)}</em>;
+            return <span key={`${i}-${j}`}>{p}</span>;
+          });
+        });
+      };
+
+      return (
+        <>
+          {!isOpen && (
+            <button onClick={onToggle} className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-[#1e40af] text-white shadow-xl flex items-center justify-center animate-bounce-slow hover:bg-[#1e40af]/90 transition-colors">
+              <IconMessageCircle />
+            </button>
+          )}
+
+          {isOpen && (
+            <div className="fixed bottom-0 right-0 md:bottom-4 md:right-4 z-50 w-full md:w-96 h-full md:h-[600px] md:max-h-[80vh] flex flex-col bg-white md:rounded-xl shadow-2xl border border-[#e8e0d4]">
+              <div className="bg-gradient-to-r from-[#1a2332] to-[#1e40af] text-white p-4 md:rounded-t-xl flex items-center justify-between shrink-0">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-lg">🏗️</div>
+                  <div>
+                    <p className="font-bold text-sm">Asistente ZF</p>
+                    <p className="text-xs text-white/70">En línea • Respuesta inmediata</p>
+                  </div>
+                </div>
+                <button onClick={onToggle} className="p-1 hover:bg-white/10 rounded-full transition-colors"><IconX /></button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-[#f7f3ed]/50">
+                {messages.map(msg => (
+                  <div key={msg.id} className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}>
+                    <div className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed whitespace-pre-line ${msg.sender === "user" ? "bg-[#1e40af] text-white rounded-br-sm" : "bg-white text-[#2d2a26] shadow-sm rounded-bl-sm"}`}>
+                      {renderText(msg.text)}
+                      {msg.options && msg.options.length > 0 && (
+                        <div className="mt-3 space-y-1.5">
+                          {msg.options.map(opt => (
+                            <button key={opt.value} onClick={() => handleOption(opt)} className="w-full text-left px-3 py-2 rounded-lg border border-[#1e40af]/30 text-[#1e40af] text-xs font-normal hover:bg-[#1e40af]/5 transition-colors">
+                              {opt.emoji && <span className="mr-1">{opt.emoji}</span>}{opt.label}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+                {typing && (
+                  <div className="flex justify-start">
+                    <div className="bg-white rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm">
+                      <span className="inline-flex gap-1"><span className="w-2 h-2 bg-[#1e40af] rounded-full animate-bounce" style={{animationDelay:"0ms"}}></span><span className="w-2 h-2 bg-[#1e40af] rounded-full animate-bounce" style={{animationDelay:"150ms"}}></span><span className="w-2 h-2 bg-[#1e40af] rounded-full animate-bounce" style={{animationDelay:"300ms"}}></span></span>
+                    </div>
+                  </div>
+                )}
+                <div ref={messagesEndRef} />
+              </div>
+
+              <div className="p-3 bg-white border-t border-[#e8e0d4] md:rounded-b-xl shrink-0">
+                {showInput ? (
+                  <form onSubmit={e => { e.preventDefault(); handleTextSubmit(); }} className="flex gap-2">
+                    <input type="text" className="flex-1 px-3 py-2 rounded-lg border border-[#e8e0d4] text-sm focus:outline-none focus:border-[#1e40af]" placeholder="Escribe tu respuesta..." value={inputValue} onChange={e => setInputValue(e.target.value)} autoFocus />
+                    <button type="submit" className="w-9 h-9 rounded-full bg-[#1e40af] text-white flex items-center justify-center hover:bg-[#1e40af]/90"><IconSend /></button>
+                  </form>
+                ) : (
+                  <p className="text-xs text-center text-[#2d2a26]/40">Selecciona una opción del chat ☝️</p>
+                )}
+              </div>
+            </div>
+          )}
+        </>
+      );
+    }
+
+    // ========== APP ==========
+    function App() {
+      const [activeSection, setActiveSection] = useState("inicio");
+      const [chatOpen, setChatOpen] = useState(false);
+
+      const refs = {
+        inicio: useRef(null),
+        servicios: useRef(null),
+        portafolio: useRef(null),
+        nosotros: useRef(null),
+        contacto: useRef(null),
+      };
+
+      const navigateTo = useCallback((section) => {
+        const ref = refs[section];
+        if (ref?.current) {
+          ref.current.scrollIntoView({ behavior: "smooth" });
+          setActiveSection(section);
+        }
+      }, []);
+
+      const toggleChat = useCallback(() => setChatOpen(prev => !prev), []);
+
+      return (
+        <div className="min-h-screen bg-white">
+          <Navbar activeSection={activeSection} onNavigate={navigateTo} />
+          <div ref={refs.inicio}><Hero onNavigate={navigateTo} onOpenChat={toggleChat} /></div>
+          <div ref={refs.servicios}><Services onOpenChat={toggleChat} /></div>
+          <div ref={refs.portafolio}><Portfolio /></div>
+          <div ref={refs.nosotros}><About /></div>
+          <div ref={refs.contacto}><Contact onOpenChat={toggleChat} /></div>
+          <Footer onNavigate={navigateTo} />
+          <Chatbot isOpen={chatOpen} onToggle={toggleChat} />
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>
