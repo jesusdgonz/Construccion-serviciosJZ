@@ -1,115 +1,304 @@
 <!DOCTYPE html>
-<html lang="es" data-theme="light">
+<html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Construcción & Servicios ZF</title>
-  <meta name="description" content="Empresa constructora con más de 10 años de experiencia en Santiago de Chile. Remodelaciones, pintura, soldadura y construcción general." />
-
-  <!-- Tailwind CSS + DaisyUI -->
-  <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" />
-  <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- React + ReactDOM -->
-  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-
-  <!-- Babel standalone for JSX -->
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
-  <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide-react@0.344.0/dist/umd/lucide-react.js"></script>
-
-  <style>
-    :root {
-      --color-primary: #1e40af;
-      --color-secondary: #c8a45e;
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Construcción &amp; Servicios ZF</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        primary: '#1e40af',
+        'primary-content': '#ffffff',
+        secondary: '#c8a45e',
+        'secondary-content': '#1a2332',
+        navy: '#1a2332',
+        cream: '#f7f3ed',
+        gold: '#c8a45e',
+      }
     }
-    html { scroll-behavior: smooth; }
-    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #ffffff; color: #1f2937; }
-    .section-animate { animation: fadeUp 0.5s ease both; }
-    @keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
-    [data-theme="light"] {
-      --p: 221 83% 40%;
-      --pc: 0 0% 100%;
-      --b1: 0 0% 100%;
-      --b2: 30 33% 96%;
-      --b3: 30 20% 92%;
-      --bc: 220 13% 18%;
-    }
-    .loading-dots span { display:inline-block; width:8px; height:8px; border-radius:50%; background:#1e40af; margin:0 2px; animation:dotBounce 1.2s infinite; }
-    .loading-dots span:nth-child(2){ animation-delay:0.2s; }
-    .loading-dots span:nth-child(3){ animation-delay:0.4s; }
-    @keyframes dotBounce { 0%,80%,100%{ transform:scale(0.7); opacity:0.5; } 40%{ transform:scale(1); opacity:1; } }
-  </style>
-
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            primary: '#1e40af',
-            secondary: '#c8a45e',
-          }
-        }
-      },
-      plugins: []
-    };
-  </script>
+  }
+}
+</script>
+<style>
+html { scroll-behavior: smooth; }
+body { margin: 0; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; color: #1f2937; }
+@keyframes fadeInUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+.section-animate { animation: fadeInUp 0.6s ease-out; }
+@keyframes bounce2 { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+.chat-bounce { animation: bounce2 2s infinite; }
+.chat-messages::-webkit-scrollbar { width: 4px; }
+.chat-messages::-webkit-scrollbar-thumb { border-radius: 4px; background: rgba(0,0,0,0.15); }
+/* Lightbox */
+.lightbox-overlay { position:fixed; inset:0; z-index:100; background:rgba(0,0,0,0.92); display:flex; align-items:center; justify-content:center; padding:1rem; }
+.lightbox-overlay img { max-height:85vh; max-width:90vw; object-fit:contain; border-radius:0.5rem; }
+.lb-btn { position:absolute; background:none; border:none; color:#fff; font-size:2rem; cursor:pointer; padding:0.5rem; opacity:0.7; transition:opacity 0.2s; }
+.lb-btn:hover { opacity:1; }
+/* FAQ accordion */
+.faq-answer { max-height:0; overflow:hidden; transition:max-height 0.3s ease, padding 0.3s ease; padding:0 1rem; }
+.faq-answer.open { max-height:300px; padding:0.75rem 1rem 1rem; }
+.faq-arrow { transition:transform 0.3s; }
+.faq-arrow.open { transform:rotate(180deg); }
+/* Mobile menu */
+.mobile-menu { display:none; }
+.mobile-menu.open { display:block; }
+</style>
 </head>
 <body>
-  <div id="root"></div>
 
-<script type="text/babel" data-presets="react">
-const { useState, useRef, useEffect, useCallback } = React;
-const { createRoot } = ReactDOM;
+<!-- ========== NAVBAR ========== -->
+<nav id="navbar" style="position:sticky;top:0;z-index:50;background:rgba(255,255,255,0.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid rgba(0,0,0,0.06);box-shadow:0 1px 3px rgba(0,0,0,0.04);">
+  <div style="max-width:72rem;margin:0 auto;padding:0.75rem 1rem;display:flex;align-items:center;justify-content:space-between;">
+    <a href="#inicio" onclick="navigateTo('inicio')" style="text-decoration:none;display:flex;align-items:center;gap:0.5rem;font-weight:700;font-size:1.1rem;color:#1f2937;">
+      <span style="font-size:1.5rem;">🏗️</span>
+      <span>Construcción <span style="color:#1e40af;">&amp;</span> Servicios ZF</span>
+    </a>
+    <!-- Desktop nav -->
+    <ul id="desktop-nav" style="display:flex;gap:0.25rem;list-style:none;margin:0;padding:0;" class="hidden md:flex">
+      <li><a href="#inicio" onclick="navigateTo('inicio')" class="nav-link" data-section="inicio" style="padding:0.5rem 0.75rem;border-radius:0.375rem;text-decoration:none;font-weight:500;color:rgba(31,41,55,0.6);transition:color 0.2s;">Inicio</a></li>
+      <li><a href="#servicios" onclick="navigateTo('servicios')" class="nav-link" data-section="servicios" style="padding:0.5rem 0.75rem;border-radius:0.375rem;text-decoration:none;font-weight:500;color:rgba(31,41,55,0.6);transition:color 0.2s;">Servicios</a></li>
+      <li><a href="#portafolio" onclick="navigateTo('portafolio')" class="nav-link" data-section="portafolio" style="padding:0.5rem 0.75rem;border-radius:0.375rem;text-decoration:none;font-weight:500;color:rgba(31,41,55,0.6);transition:color 0.2s;">Portafolio</a></li>
+      <li><a href="#nosotros" onclick="navigateTo('nosotros')" class="nav-link" data-section="nosotros" style="padding:0.5rem 0.75rem;border-radius:0.375rem;text-decoration:none;font-weight:500;color:rgba(31,41,55,0.6);transition:color 0.2s;">Nosotros</a></li>
+      <li><a href="#contacto" onclick="navigateTo('contacto')" class="nav-link" data-section="contacto" style="padding:0.5rem 0.75rem;border-radius:0.375rem;text-decoration:none;font-weight:500;color:rgba(31,41,55,0.6);transition:color 0.2s;">Contacto</a></li>
+    </ul>
+    <!-- Hamburger -->
+    <button id="hamburger-btn" onclick="toggleMobileMenu()" style="display:none;background:none;border:none;cursor:pointer;font-size:1.5rem;padding:0.25rem;" class="md:hidden">☰</button>
+  </div>
+  <!-- Mobile dropdown -->
+  <div id="mobile-menu" class="mobile-menu" style="background:#fff;border-top:1px solid rgba(0,0,0,0.08);box-shadow:0 4px 12px rgba(0,0,0,0.1);">
+    <ul style="list-style:none;margin:0;padding:0.5rem;">
+      <li><a href="#inicio" onclick="navigateTo('inicio');closeMobileMenu()" style="display:block;padding:0.75rem 1rem;text-decoration:none;font-weight:500;color:rgba(31,41,55,0.7);border-radius:0.375rem;">Inicio</a></li>
+      <li><a href="#servicios" onclick="navigateTo('servicios');closeMobileMenu()" style="display:block;padding:0.75rem 1rem;text-decoration:none;font-weight:500;color:rgba(31,41,55,0.7);border-radius:0.375rem;">Servicios</a></li>
+      <li><a href="#portafolio" onclick="navigateTo('portafolio');closeMobileMenu()" style="display:block;padding:0.75rem 1rem;text-decoration:none;font-weight:500;color:rgba(31,41,55,0.7);border-radius:0.375rem;">Portafolio</a></li>
+      <li><a href="#nosotros" onclick="navigateTo('nosotros');closeMobileMenu()" style="display:block;padding:0.75rem 1rem;text-decoration:none;font-weight:500;color:rgba(31,41,55,0.7);border-radius:0.375rem;">Nosotros</a></li>
+      <li><a href="#contacto" onclick="navigateTo('contacto');closeMobileMenu()" style="display:block;padding:0.75rem 1rem;text-decoration:none;font-weight:500;color:rgba(31,41,55,0.7);border-radius:0.375rem;">Contacto</a></li>
+    </ul>
+  </div>
+</nav>
 
-// ─── Icons ──────────────────────────────────────────────────────────────────
-const { Menu, X, ChevronLeft, ChevronRight, Award, Users, Clock, Shield,
-        MessageCircle, Send, Mail, MapPin, CheckCircle, ArrowLeft } = LucideReact;
+<!-- ========== HERO ========== -->
+<section id="inicio" style="position:relative;min-height:85vh;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+  <div style="position:absolute;inset:0;background:url('https://912ec8c7ff.cbaul-cdnwnd.com/fbf05fcc8064ddefbfb57bdbcd633ca9/200000140-1021410216/1000183791-7.jpeg?ph=912ec8c7ff') center/cover no-repeat;"></div>
+  <div style="position:absolute;inset:0;background:linear-gradient(to bottom, rgba(26,35,50,0.85), rgba(30,64,175,0.6), rgba(26,35,50,0.9));"></div>
+  <div style="position:relative;z-index:10;text-align:center;padding:2rem 1rem;max-width:42rem;margin:0 auto;">
+    <div style="margin-bottom:1.5rem;">
+      <span style="display:inline-block;background:rgba(200,164,94,0.9);color:#1a2332;font-weight:600;letter-spacing:0.05em;padding:0.625rem 1.25rem;border-radius:9999px;font-size:0.875rem;box-shadow:0 2px 8px rgba(0,0,0,0.15);">+10 AÑOS DE EXPERIENCIA</span>
+    </div>
+    <h1 style="font-size:clamp(2.25rem,5vw,3.75rem);font-weight:800;color:#fff;line-height:1.15;margin:0 0 1.5rem;">
+      Hacemos de tu idea <span style="color:#c8a45e;">una realidad</span>
+    </h1>
+    <p style="font-size:clamp(1rem,2.5vw,1.25rem);color:rgba(255,255,255,0.75);margin:0 auto 1rem;max-width:36rem;line-height:1.6;">
+      Más allá de muros o reparaciones, construimos sueños. Empresa constructora en <strong style="color:#fff;">Santiago de Chile</strong> especializada en construcción, remodelaciones, soldadura y más.
+    </p>
+    <div style="display:flex;flex-wrap:wrap;gap:0.75rem;justify-content:center;margin-top:2rem;">
+      <button onclick="toggleChat()" style="padding:0.875rem 1.75rem;border-radius:0.5rem;font-weight:600;font-size:1rem;cursor:pointer;background:#fff;color:#1e40af;border:none;box-shadow:0 4px 12px rgba(0,0,0,0.2);transition:background 0.2s;">💬 Solicitar Presupuesto</button>
+      <button onclick="navigateTo('servicios')" style="padding:0.875rem 1.75rem;border-radius:0.5rem;font-weight:600;font-size:1rem;cursor:pointer;background:transparent;color:#fff;border:2px solid rgba(255,255,255,0.4);transition:all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.12)';this.style.borderColor='rgba(255,255,255,0.6)'" onmouseout="this.style.background='transparent';this.style.borderColor='rgba(255,255,255,0.4)'">Ver Servicios</button>
+    </div>
+    <div style="margin-top:3rem;display:flex;flex-wrap:wrap;justify-content:center;gap:1.5rem;color:rgba(255,255,255,0.65);">
+      <div style="display:flex;align-items:center;gap:0.5rem;"><span style="font-size:1.5rem;">📍</span><span style="font-size:0.875rem;">Santiago, Chile</span></div>
+      <div style="display:flex;align-items:center;gap:0.5rem;"><span style="font-size:1.5rem;">✅</span><span style="font-size:0.875rem;">Proyectos a todo Chile</span></div>
+      <div style="display:flex;align-items:center;gap:0.5rem;"><span style="font-size:1.5rem;">🏆</span><span style="font-size:0.875rem;">Garantía en todos los trabajos</span></div>
+    </div>
+  </div>
+</section>
 
-// ─── DATA ────────────────────────────────────────────────────────────────────
+<!-- ========== SERVICES ========== -->
+<section id="servicios" class="section-animate" style="padding:4rem 1rem;background:#ffffff;">
+  <div style="max-width:72rem;margin:0 auto;">
+    <div style="text-align:center;margin-bottom:3rem;">
+      <span style="display:inline-block;background:rgba(30,64,175,0.1);color:#1e40af;font-weight:600;font-size:0.875rem;padding:0.375rem 1rem;border-radius:9999px;margin-bottom:0.75rem;">NUESTROS SERVICIOS</span>
+      <h2 style="font-size:clamp(1.875rem,4vw,2.25rem);font-weight:700;color:#1f2937;margin:0 0 0.75rem;">Soluciones profesionales para tu proyecto</h2>
+      <p style="color:rgba(31,41,55,0.55);max-width:40rem;margin:0 auto;">Ofrecemos una amplia gama de servicios de construcción y remodelación con los más altos estándares de calidad.</p>
+    </div>
+    <div id="services-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,28rem),1fr));gap:1.5rem;"></div>
+  </div>
+</section>
+
+<!-- ========== PORTFOLIO ========== -->
+<section id="portafolio" class="section-animate" style="padding:4rem 1rem;background:#f7f3ed;">
+  <div style="max-width:72rem;margin:0 auto;">
+    <div style="text-align:center;margin-bottom:3rem;">
+      <span style="display:inline-block;background:rgba(30,64,175,0.1);color:#1e40af;font-weight:600;font-size:0.875rem;padding:0.375rem 1rem;border-radius:9999px;margin-bottom:0.75rem;">PORTAFOLIO</span>
+      <h2 style="font-size:clamp(1.875rem,4vw,2.25rem);font-weight:700;color:#1f2937;margin:0 0 0.75rem;">Nuestro Trabajo</h2>
+      <p style="color:rgba(31,41,55,0.55);max-width:40rem;margin:0 auto;">Más de 10 años construyendo sueños. Conoce algunos de nuestros proyectos completados en Santiago y el resto de Chile.</p>
+    </div>
+    <div id="portfolio-grid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:0.75rem;"></div>
+  </div>
+</section>
+
+<!-- Lightbox container -->
+<div id="lightbox" class="lightbox-overlay" style="display:none;" onclick="closeLightbox()">
+  <button class="lb-btn" style="top:1rem;right:1rem;font-size:1.75rem;" onclick="closeLightbox()">✕</button>
+  <button class="lb-btn" style="left:0.5rem;" onclick="event.stopPropagation();prevImage()">‹</button>
+  <img id="lightbox-img" src="" alt="Proyecto" onclick="event.stopPropagation()">
+  <button class="lb-btn" style="right:0.5rem;" onclick="event.stopPropagation();nextImage()">›</button>
+  <div id="lightbox-counter" style="position:absolute;bottom:1rem;color:rgba(255,255,255,0.6);font-size:0.875rem;"></div>
+</div>
+
+<!-- ========== ABOUT ========== -->
+<section id="nosotros" class="section-animate" style="padding:4rem 1rem;background:#ffffff;">
+  <div style="max-width:72rem;margin:0 auto;">
+    <div style="text-align:center;margin-bottom:3rem;">
+      <span style="display:inline-block;background:rgba(30,64,175,0.1);color:#1e40af;font-weight:600;font-size:0.875rem;padding:0.375rem 1rem;border-radius:9999px;margin-bottom:0.75rem;">SOBRE NOSOTROS</span>
+      <h2 style="font-size:clamp(1.875rem,4vw,2.25rem);font-weight:700;color:#1f2937;margin:0 0 0.75rem;">Construcción &amp; Servicios ZF</h2>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr;gap:2rem;align-items:center;margin-bottom:3rem;" class="md:grid-cols-2">
+      <div style="border-radius:0.75rem;box-shadow:0 4px 12px rgba(0,0,0,0.08);background:#fff;border:1px solid #e5e7eb;display:flex;align-items:center;justify-content:center;padding:1rem;min-height:320px;">
+        <img src="https://912ec8c7ff.cbaul-cdnwnd.com/fbf05fcc8064ddefbfb57bdbcd633ca9/200000081-aead9aeadb/1000183641-1.jpeg?ph=912ec8c7ff" alt="Logo Construcción & Servicios ZF" style="width:100%;max-width:24rem;max-height:400px;object-fit:contain;" loading="lazy">
+      </div>
+      <div style="display:flex;flex-direction:column;gap:1rem;">
+        <p style="color:rgba(31,41,55,0.75);line-height:1.7;">Somos una empresa constructora con <strong style="color:#1f2937;">más de 10 años de experiencia</strong> en el rubro de la construcción general y servicios relacionados. Nos enfocamos en ofrecer un servicio de alta calidad, cumpliendo con los plazos establecidos y superando las expectativas de nuestros clientes.</p>
+        <p style="color:rgba(31,41,55,0.75);line-height:1.7;">Ubicados en la <strong style="color:#1f2937;">Región Metropolitana de Santiago</strong>, esto no es una limitante ya que aceptamos proyectos a lo largo de todo Chile. Ofrecemos servicios a clientes de diferentes sectores y tamaños.</p>
+        <p style="color:rgba(31,41,55,0.75);line-height:1.7;">Nuestro equipo altamente calificado y comprometido nos permite brindar proyectos de alta calidad tratando cada proyecto como si fuera propio.</p>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;" class="md:grid-cols-4">
+      <div style="background:rgba(247,243,237,0.7);border:1px solid rgba(0,0,0,0.06);text-align:center;padding:1.5rem;border-radius:0.75rem;transition:box-shadow 0.2s;">
+        <div style="color:#1e40af;font-size:1.75rem;margin-bottom:0.5rem;">🕐</div>
+        <div style="font-size:1.5rem;font-weight:700;color:#1f2937;">+10</div>
+        <div style="font-size:0.875rem;color:rgba(31,41,55,0.55);">Años de experiencia</div>
+      </div>
+      <div style="background:rgba(247,243,237,0.7);border:1px solid rgba(0,0,0,0.06);text-align:center;padding:1.5rem;border-radius:0.75rem;">
+        <div style="color:#1e40af;font-size:1.75rem;margin-bottom:0.5rem;">👥</div>
+        <div style="font-size:1.5rem;font-weight:700;color:#1f2937;">+500</div>
+        <div style="font-size:0.875rem;color:rgba(31,41,55,0.55);">Proyectos completados</div>
+      </div>
+      <div style="background:rgba(247,243,237,0.7);border:1px solid rgba(0,0,0,0.06);text-align:center;padding:1.5rem;border-radius:0.75rem;">
+        <div style="color:#1e40af;font-size:1.75rem;margin-bottom:0.5rem;">🏆</div>
+        <div style="font-size:1.5rem;font-weight:700;color:#1f2937;">100%</div>
+        <div style="font-size:0.875rem;color:rgba(31,41,55,0.55);">Compromiso</div>
+      </div>
+      <div style="background:rgba(247,243,237,0.7);border:1px solid rgba(0,0,0,0.06);text-align:center;padding:1.5rem;border-radius:0.75rem;">
+        <div style="color:#1e40af;font-size:1.75rem;margin-bottom:0.5rem;">🛡️</div>
+        <div style="font-size:1.5rem;font-weight:700;color:#1f2937;">5 años</div>
+        <div style="font-size:0.875rem;color:rgba(31,41,55,0.55);">Garantía estructural</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== CONTACT ========== -->
+<section id="contacto" class="section-animate" style="padding:4rem 1rem;background:#f7f3ed;">
+  <div style="max-width:72rem;margin:0 auto;">
+    <div style="text-align:center;margin-bottom:3rem;">
+      <span style="display:inline-block;background:rgba(30,64,175,0.1);color:#1e40af;font-weight:600;font-size:0.875rem;padding:0.375rem 1rem;border-radius:9999px;margin-bottom:0.75rem;">CONTACTO</span>
+      <h2 style="font-size:clamp(1.875rem,4vw,2.25rem);font-weight:700;color:#1f2937;margin:0 0 0.75rem;">¿Tienes un proyecto en mente?</h2>
+      <p style="color:rgba(31,41,55,0.55);max-width:40rem;margin:0 auto;">Contáctanos y te responderemos a la brevedad. También puedes usar nuestro asistente virtual para una cotización rápida.</p>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr;gap:2rem;" class="lg:grid-cols-2">
+      <!-- Contact form -->
+      <div style="background:#fff;border-radius:0.75rem;box-shadow:0 1px 4px rgba(0,0,0,0.05);border:1px solid rgba(0,0,0,0.06);padding:1.5rem;">
+        <h3 style="font-weight:600;font-size:1.125rem;color:#1f2937;margin:0 0 1rem;display:flex;align-items:center;gap:0.5rem;">
+          <span style="color:#1e40af;">✉️</span> Envíanos un mensaje
+        </h3>
+        <div id="contact-success" style="display:none;background:#d1fae5;color:#065f46;padding:0.75rem 1rem;border-radius:0.5rem;font-size:0.875rem;margin-bottom:0.75rem;">✅ ¡Mensaje enviado! Te contactaremos pronto.</div>
+        <form id="contact-form" onsubmit="handleContactSubmit(event)" style="display:flex;flex-direction:column;gap:0.75rem;">
+          <input type="text" placeholder="Tu nombre" required style="width:100%;padding:0.625rem 0.75rem;border:1px solid #d1d5db;border-radius:0.375rem;font-size:0.875rem;background:rgba(247,243,237,0.5);box-sizing:border-box;">
+          <input type="email" placeholder="Tu email" required style="width:100%;padding:0.625rem 0.75rem;border:1px solid #d1d5db;border-radius:0.375rem;font-size:0.875rem;background:rgba(247,243,237,0.5);box-sizing:border-box;">
+          <input type="tel" placeholder="Tu teléfono" style="width:100%;padding:0.625rem 0.75rem;border:1px solid #d1d5db;border-radius:0.375rem;font-size:0.875rem;background:rgba(247,243,237,0.5);box-sizing:border-box;">
+          <textarea placeholder="Cuéntanos sobre tu proyecto..." required style="width:100%;padding:0.625rem 0.75rem;border:1px solid #d1d5db;border-radius:0.375rem;font-size:0.875rem;height:7rem;resize:vertical;background:rgba(247,243,237,0.5);box-sizing:border-box;font-family:inherit;"></textarea>
+          <button type="submit" style="width:100%;padding:0.75rem;background:#1e40af;color:#fff;border:none;border-radius:0.375rem;font-weight:600;font-size:0.9375rem;cursor:pointer;transition:background 0.2s;" onmouseover="this.style.background='#1e3a8a'" onmouseout="this.style.background='#1e40af'">Enviar mensaje</button>
+        </form>
+      </div>
+
+      <!-- Info + FAQ -->
+      <div style="display:flex;flex-direction:column;gap:1.5rem;">
+        <div style="background:#fff;border-radius:0.75rem;box-shadow:0 1px 4px rgba(0,0,0,0.05);border:1px solid rgba(0,0,0,0.06);padding:1.5rem;">
+          <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem;">
+            <div style="background:rgba(30,64,175,0.1);border-radius:9999px;padding:0.625rem;"><span style="color:#1e40af;">📍</span></div>
+            <div><p style="font-weight:600;color:#1f2937;margin:0;">Ubicación</p><p style="font-size:0.875rem;color:rgba(31,41,55,0.55);margin:0;">Santiago, Región Metropolitana, Chile</p></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem;">
+            <div style="background:rgba(30,64,175,0.1);border-radius:9999px;padding:0.625rem;"><span style="color:#1e40af;">📧</span></div>
+            <div><p style="font-weight:600;color:#1f2937;margin:0;">Email</p><p style="font-size:0.875rem;color:rgba(31,41,55,0.55);margin:0;">construcctorayservicios@gmail.com</p></div>
+          </div>
+          <button onclick="toggleChat()" style="width:100%;padding:0.625rem;background:transparent;color:#1e40af;border:2px solid #1e40af;border-radius:0.375rem;font-weight:600;font-size:0.875rem;cursor:pointer;transition:all 0.2s;" onmouseover="this.style.background='#1e40af';this.style.color='#fff'" onmouseout="this.style.background='transparent';this.style.color='#1e40af'">💬 Chatear con nuestro asistente</button>
+        </div>
+
+        <!-- FAQ -->
+        <div style="background:#fff;border-radius:0.75rem;box-shadow:0 1px 4px rgba(0,0,0,0.05);border:1px solid rgba(0,0,0,0.06);padding:1.5rem;">
+          <h3 style="font-weight:600;font-size:1.125rem;color:#1f2937;margin:0 0 0.75rem;">Preguntas Frecuentes</h3>
+          <div id="faq-container" style="display:flex;flex-direction:column;gap:0.5rem;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== FOOTER ========== -->
+<footer style="background:#1a2332;color:#c8c4bb;">
+  <div style="max-width:72rem;margin:0 auto;padding:2.5rem 1rem;">
+    <div style="display:grid;grid-template-columns:1fr;gap:2rem;" class="md:grid-cols-3">
+      <div>
+        <h3 style="font-size:1.125rem;font-weight:700;color:#fff;margin:0 0 0.75rem;">🏗️ Construcción &amp; Servicios ZF</h3>
+        <p style="color:#8a8680;font-size:0.875rem;line-height:1.6;margin:0;">Más de 10 años construyendo sueños en Santiago de Chile y todo el país. Calidad, compromiso y profesionalismo en cada proyecto.</p>
+      </div>
+      <div>
+        <h4 style="font-weight:600;color:#fff;margin:0 0 0.75rem;">Navegación</h4>
+        <ul style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:0.25rem;">
+          <li><a href="#inicio" onclick="navigateTo('inicio')" style="color:#8a8680;text-decoration:none;font-size:0.875rem;text-transform:capitalize;transition:color 0.2s;" onmouseover="this.style.color='#c8a45e'" onmouseout="this.style.color='#8a8680'">Inicio</a></li>
+          <li><a href="#servicios" onclick="navigateTo('servicios')" style="color:#8a8680;text-decoration:none;font-size:0.875rem;text-transform:capitalize;transition:color 0.2s;" onmouseover="this.style.color='#c8a45e'" onmouseout="this.style.color='#8a8680'">Servicios</a></li>
+          <li><a href="#portafolio" onclick="navigateTo('portafolio')" style="color:#8a8680;text-decoration:none;font-size:0.875rem;text-transform:capitalize;transition:color 0.2s;" onmouseover="this.style.color='#c8a45e'" onmouseout="this.style.color='#8a8680'">Portafolio</a></li>
+          <li><a href="#nosotros" onclick="navigateTo('nosotros')" style="color:#8a8680;text-decoration:none;font-size:0.875rem;text-transform:capitalize;transition:color 0.2s;" onmouseover="this.style.color='#c8a45e'" onmouseout="this.style.color='#8a8680'">Nosotros</a></li>
+          <li><a href="#contacto" onclick="navigateTo('contacto')" style="color:#8a8680;text-decoration:none;font-size:0.875rem;text-transform:capitalize;transition:color 0.2s;" onmouseover="this.style.color='#c8a45e'" onmouseout="this.style.color='#8a8680'">Contacto</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 style="font-weight:600;color:#fff;margin:0 0 0.75rem;">Contacto</h4>
+        <ul style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:0.5rem;font-size:0.875rem;color:#8a8680;">
+          <li>📍 Santiago, Región Metropolitana</li>
+          <li>📧 construcctorayservicios@gmail.com</li>
+          <li>📱 WhatsApp: Próximamente</li>
+          <li>📷 @Construccionyservicioszf.cl</li>
+        </ul>
+      </div>
+    </div>
+    <div style="border-top:1px solid rgba(255,255,255,0.1);margin-top:2rem;padding-top:1.5rem;text-align:center;font-size:0.875rem;color:#6a665f;">
+      © <script>document.write(new Date().getFullYear())</script> Construcción &amp; Servicios ZF — Todos los derechos reservados.
+    </div>
+  </div>
+</footer>
+
+<!-- ========== CHATBOT ========== -->
+<!-- Floating button -->
+<button id="chat-toggle-btn" onclick="toggleChat()" class="chat-bounce" style="position:fixed;bottom:1.5rem;right:1.5rem;z-index:50;width:3.5rem;height:3.5rem;border-radius:9999px;background:#1e40af;color:#fff;border:none;cursor:pointer;box-shadow:0 4px 16px rgba(30,64,175,0.4);display:flex;align-items:center;justify-content:center;font-size:1.75rem;transition:transform 0.2s;">
+  💬
+</button>
+
+<!-- Chat window -->
+<div id="chat-window" style="display:none;position:fixed;bottom:0;right:0;z-index:50;width:100%;height:100%;background:#fff;flex-direction:column;box-shadow:-4px 0 24px rgba(0,0,0,0.15);border:1px solid #e5e7eb;">
+  <!-- Header -->
+  <div style="background:linear-gradient(to right,#1a2332,#1e40af);color:#fff;padding:1rem;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
+    <div style="display:flex;align-items:center;gap:0.75rem;">
+      <div style="width:2.5rem;height:2.5rem;border-radius:9999px;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:1.125rem;">🏗️</div>
+      <div>
+        <p style="font-weight:700;font-size:0.875rem;margin:0;">Asistente ZF</p>
+        <p style="font-size:0.75rem;color:rgba(255,255,255,0.7);margin:0;">En línea • Respuesta inmediata</p>
+      </div>
+    </div>
+    <button onclick="toggleChat()" style="background:none;border:none;color:#fff;cursor:pointer;font-size:1.25rem;padding:0.25rem;">✕</button>
+  </div>
+  <!-- Messages -->
+  <div id="chat-messages" class="chat-messages" style="flex:1;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:0.75rem;background:rgba(247,243,237,0.5);"></div>
+  <!-- Input -->
+  <div id="chat-input-area" style="padding:0.75rem;background:#fff;border-top:1px solid #e5e7eb;flex-shrink:0;">
+    <p id="chat-hint" style="font-size:0.75rem;text-align:center;color:rgba(31,41,55,0.4);margin:0;">Selecciona una opción del chat ☝️</p>
+    <form id="chat-form" onsubmit="handleChatSubmit(event)" style="display:none;gap:0.5rem;align-items:center;">
+      <input id="chat-input" type="text" placeholder="Escribe tu respuesta..." style="flex:1;padding:0.5rem 0.75rem;border:1px solid #d1d5db;border-radius:0.375rem;font-size:0.875rem;box-sizing:border-box;" autocomplete="off">
+      <button type="submit" style="width:2rem;height:2rem;border-radius:9999px;background:#1e40af;color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:0.875rem;flex-shrink:0;">➤</button>
+    </form>
+  </div>
+</div>
+
+<script>
+// ===== DATA =====
 const SERVICIOS = [
-  {
-    id: "remodelacion",
-    nombre: "Remodelación de Interiores",
-    descripcion: "Transformamos tus espacios con remodelaciones completas de cocinas, baños, dormitorios y living. Incluye demolición, obra gruesa, terminaciones y limpieza final.",
-    icono: "🏠",
-    unidad: "m²",
-    precioBase: 185000,
-    detalles: ["Demolición y retiro de escombros","Instalaciones eléctricas y sanitarias","Revestimientos y terminaciones","Pintura y limpieza final"],
-    imagen: "https://912ec8c7ff.cbaul-cdnwnd.com/fbf05fcc8064ddefbfb57bdbcd633ca9/200000135-afcb5afcb6/1000183893-3.jpeg?ph=912ec8c7ff",
-  },
-  {
-    id: "pintura",
-    nombre: "Pintura General",
-    descripcion: "Servicio profesional de pintura para interiores y exteriores. Preparación de superficies, empaste, lijado y aplicación de pintura de primera calidad.",
-    icono: "🎨",
-    unidad: "m²",
-    precioBase: 12500,
-    detalles: ["Preparación y empaste de muros","Lijado y aplicación de base","Dos manos de pintura premium","Protección de pisos y muebles"],
-    imagen: "https://912ec8c7ff.cbaul-cdnwnd.com/fbf05fcc8064ddefbfb57bdbcd633ca9/200000148-a18cba18cd/1000183894-77.jpeg?ph=912ec8c7ff",
-  },
-  {
-    id: "soldadura",
-    nombre: "Soldadura y Estructuras Metálicas",
-    descripcion: "Fabricación e instalación de estructuras metálicas, rejas, portones, escaleras, barandas y trabajos de soldadura en general.",
-    icono: "⚙️",
-    unidad: "proyecto",
-    precioBase: 350000,
-    detalles: ["Diseño y fabricación a medida","Soldadura MIG/TIG certificada","Tratamiento anticorrosivo","Instalación y acabado final"],
-    imagen: "https://912ec8c7ff.cbaul-cdnwnd.com/fbf05fcc8064ddefbfb57bdbcd633ca9/200000151-8475d8475f/1000000981-2.jpeg?ph=912ec8c7ff",
-  },
-  {
-    id: "construccion",
-    nombre: "Construcción General",
-    descripcion: "Construcción de obras nuevas desde cimientos hasta terminaciones. Casas, ampliaciones, galpones, bodegas y proyectos comerciales.",
-    icono: "🏗️",
-    unidad: "m²",
-    precioBase: 420000,
-    detalles: ["Obra gruesa completa","Instalaciones eléctricas y sanitarias","Techumbres y terminaciones","Gestión de permisos municipales"],
-    imagen: "https://912ec8c7ff.cbaul-cdnwnd.com/fbf05fcc8064ddefbfb57bdbcd633ca9/200000140-1021410216/1000183791-7.jpeg?ph=912ec8c7ff",
-  },
+  { id:"remodelacion", nombre:"Remodelación de Interiores", descripcion:"Transformamos tus espacios con remodelaciones completas de cocinas, baños, dormitorios y living. Incluye demolición, obra gruesa, terminaciones y limpieza final.", icono:"🏠", unidad:"m²", precioBase:185000, detalles:["Demolición y retiro de escombros","Instalaciones eléctricas y sanitarias","Revestimientos y terminaciones","Pintura y limpieza final"], imagen:"https://912ec8c7ff.cbaul-cdnwnd.com/fbf05fcc8064ddefbfb57bdbcd633ca9/200000135-afcb5afcb6/1000183893-3.jpeg?ph=912ec8c7ff" },
+  { id:"pintura", nombre:"Pintura General", descripcion:"Servicio profesional de pintura para interiores y exteriores. Preparación de superficies, empaste, lijado y aplicación de pintura de primera calidad.", icono:"🎨", unidad:"m²", precioBase:12500, detalles:["Preparación y empaste de muros","Lijado y aplicación de base","Dos manos de pintura premium","Protección de pisos y muebles"], imagen:"https://912ec8c7ff.cbaul-cdnwnd.com/fbf05fcc8064ddefbfb57bdbcd633ca9/200000148-a18cba18cd/1000183894-77.jpeg?ph=912ec8c7ff" },
+  { id:"soldadura", nombre:"Soldadura y Estructuras Metálicas", descripcion:"Fabricación e instalación de estructuras metálicas, rejas, portones, escaleras, barandas y trabajos de soldadura en general.", icono:"⚙️", unidad:"proyecto", precioBase:350000, detalles:["Diseño y fabricación a medida","Soldadura MIG/TIG certificada","Tratamiento anticorrosivo","Instalación y acabado final"], imagen:"https://912ec8c7ff.cbaul-cdnwnd.com/fbf05fcc8064ddefbfb57bdbcd633ca9/200000151-8475d8475f/1000000981-2.jpeg?ph=912ec8c7ff" },
+  { id:"construccion", nombre:"Construcción General", descripcion:"Construcción de obras nuevas desde cimientos hasta terminaciones. Casas, ampliaciones, galpones, bodegas y proyectos comerciales.", icono:"🏗️", unidad:"m²", precioBase:420000, detalles:["Obra gruesa completa","Instalaciones eléctricas y sanitarias","Techumbres y terminaciones","Gestión de permisos municipales"], imagen:"https://912ec8c7ff.cbaul-cdnwnd.com/fbf05fcc8064ddefbfb57bdbcd633ca9/200000140-1021410216/1000183791-7.jpeg?ph=912ec8c7ff" }
 ];
 
 const PORTFOLIO_IMAGES = [
@@ -128,744 +317,525 @@ const PORTFOLIO_IMAGES = [
   "https://912ec8c7ff.cbaul-cdnwnd.com/fbf05fcc8064ddefbfb57bdbcd633ca9/200000161-05f7005f72/1000000453-4.jpeg?ph=912ec8c7ff",
   "https://912ec8c7ff.cbaul-cdnwnd.com/fbf05fcc8064ddefbfb57bdbcd633ca9/200000163-31fa731fa9/1000000468-2.jpeg?ph=912ec8c7ff",
   "https://912ec8c7ff.cbaul-cdnwnd.com/fbf05fcc8064ddefbfb57bdbcd633ca9/200000165-924dd924df/1000000435-3.jpeg?ph=912ec8c7ff",
-  "https://912ec8c7ff.cbaul-cdnwnd.com/fbf05fcc8064ddefbfb57bdbcd633ca9/200000167-a2799a27a2/1000000401-7.jpeg?ph=912ec8c7ff",
+  "https://912ec8c7ff.cbaul-cdnwnd.com/fbf05fcc8064ddefbfb57bdbcd633ca9/200000167-a2799a27a2/1000000401-7.jpeg?ph=912ec8c7ff"
 ];
 
 const FAQ_ITEMS = [
-  { pregunta: "¿En qué zonas trabajan?", respuesta: "Estamos ubicados en la Región Metropolitana de Santiago, pero aceptamos proyectos a lo largo de todo Chile." },
-  { pregunta: "¿Cuánto demora un proyecto?", respuesta: "Una remodelación de baño puede tomar 2-3 semanas. Una construcción completa puede tomar 3-6 meses. Te damos un plazo estimado en el presupuesto." },
-  { pregunta: "¿Ofrecen garantía?", respuesta: "Sí: pintura (1 año), remodelaciones (2 años), construcción (5 años en estructura)." },
-  { pregunta: "¿Cómo es el proceso de contratación?", respuesta: "1) Contacto. 2) Visita al lugar. 3) Presupuesto detallado. 4) Contrato. 5) Pago por etapas según avance." },
+  { pregunta:"¿En qué zonas trabajan?", respuesta:"Estamos ubicados en la Región Metropolitana de Santiago, pero aceptamos proyectos a lo largo de todo Chile. Para proyectos fuera de la RM, evaluamos caso a caso." },
+  { pregunta:"¿Cuánto demora un proyecto?", respuesta:"Depende del tipo y tamaño del proyecto. Una remodelación de baño puede tomar 2-3 semanas. Una construcción completa puede tomar 3-6 meses. Te damos un plazo estimado en el presupuesto." },
+  { pregunta:"¿Ofrecen garantía?", respuesta:"Sí, todos nuestros trabajos tienen garantía. La duración depende del tipo de servicio: pintura (1 año), remodelaciones (2 años), construcción (5 años en estructura)." },
+  { pregunta:"¿Cómo es el proceso de contratación?", respuesta:"1) Nos contactas y nos cuentas tu proyecto. 2) Visitamos el lugar para evaluar. 3) Te enviamos un presupuesto detallado. 4) Si aceptas, firmamos contrato y comenzamos. 5) Pago en etapas según avance." }
 ];
 
-const COMUNAS_SANTIAGO = [
-  "Santiago Centro","Providencia","Las Condes","Vitacura","Lo Barnechea",
-  "Ñuñoa","La Reina","Peñalolén","Macul","San Joaquín",
-  "La Florida","Puente Alto","La Granja","San Ramón","San Miguel",
-  "La Cisterna","El Bosque","Pedro Aguirre Cerda","Lo Espejo","Cerrillos",
-  "Maipú","Estación Central","Cerro Navia","Lo Prado","Pudahuel",
-  "Quinta Normal","Renca","Independencia","Recoleta","Conchalí",
-  "Huechuraba","Quilicura","Colina","Lampa","Buin",
-  "San Bernardo","Padre Hurtado","Peñaflor","Talagante","Otra comuna/región",
-];
+const COMUNAS_SANTIAGO = ["Santiago Centro","Providencia","Las Condes","Vitacura","Lo Barnechea","Ñuñoa","La Reina","Peñalolén","Macul","San Joaquín","La Florida","Puente Alto","La Granja","San Ramón","San Miguel","La Cisterna","El Bosque","Pedro Aguirre Cerda","Lo Espejo","Cerrillos","Maipú","Estación Central","Cerro Navia","Lo Prado","Pudahuel","Quinta Normal","Renca","Independencia","Recoleta","Conchalí","Huechuraba","Quilicura","Colina","Lampa","Buin","San Bernardo","Padre Hurtado","Peñaflor","Talagante","Otra comuna/región"];
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-function formatCLP(n) {
-  return "$" + n.toLocaleString("es-CL");
+// ===== UTILITIES =====
+function formatCLP(n) { return "$" + n.toLocaleString("es-CL"); }
+function genId() { return Math.random().toString(36).slice(2,10); }
+
+// ===== NAVIGATION =====
+function navigateTo(section) {
+  var el = document.getElementById(section);
+  if (el) el.scrollIntoView({ behavior:'smooth' });
+  closeMobileMenu();
+  return false;
 }
-function genId() {
-  return Math.random().toString(36).slice(2, 10);
+function toggleMobileMenu() {
+  document.getElementById('mobile-menu').classList.toggle('open');
 }
-
-// ─── NAVBAR ──────────────────────────────────────────────────────────────────
-const NAV_ITEMS = [
-  { id: "inicio", label: "Inicio" },
-  { id: "servicios", label: "Servicios" },
-  { id: "portafolio", label: "Portafolio" },
-  { id: "nosotros", label: "Nosotros" },
-  { id: "contacto", label: "Contacto" },
-];
-
-function Navbar({ activeSection, onNavigate }) {
-  const [open, setOpen] = useState(false);
-  const handleNav = (id) => { onNavigate(id); setOpen(false); };
-  return (
-    <div className="navbar bg-white/90 backdrop-blur-md text-base-content sticky top-0 z-50 shadow-sm border-b border-base-300/50 px-4">
-      <div className="flex-1">
-        <button onClick={() => handleNav("inicio")} className="text-lg font-bold tracking-wide flex items-center gap-2 hover:opacity-80 transition-opacity">
-          <span className="text-2xl">🏗️</span>
-          <span className="text-base-content">Construcción <span style={{color:'#1e40af'}}>&</span> Servicios ZF</span>
-        </button>
-      </div>
-      <div className="hidden md:flex flex-none">
-        <ul className="menu menu-horizontal gap-1">
-          {NAV_ITEMS.map(item => (
-            <li key={item.id}>
-              <button onClick={() => handleNav(item.id)}
-                style={activeSection === item.id ? {color:'#1e40af', fontWeight:'700'} : {}}
-                className="font-medium text-base-content/70 hover:text-primary transition-colors">
-                {item.label}
-              </button>
-            </li>
-          ))}
-        </ul>
-      </div>
-      <div className="md:hidden flex-none">
-        <button className="btn btn-ghost btn-sm" onClick={() => setOpen(!open)}>
-          {open ? <X size={22} /> : <Menu size={22} />}
-        </button>
-      </div>
-      {open && (
-        <div className="absolute top-full left-0 right-0 bg-white shadow-xl md:hidden z-50 border-b border-base-300">
-          <ul className="menu w-full p-2">
-            {NAV_ITEMS.map(item => (
-              <li key={item.id}>
-                <button onClick={() => handleNav(item.id)}
-                  className={`w-full text-left font-medium ${activeSection === item.id ? "text-primary font-bold" : "text-base-content/70"}`}>
-                  {item.label}
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-    </div>
-  );
+function closeMobileMenu() {
+  document.getElementById('mobile-menu').classList.remove('open');
 }
 
-// ─── HERO ─────────────────────────────────────────────────────────────────────
-function Hero({ onNavigate, onOpenChat }) {
-  return (
-    <div className="hero relative overflow-hidden" style={{minHeight:'85vh'}}>
-      <div className="absolute inset-0 bg-cover bg-center" style={{backgroundImage:"url('https://912ec8c7ff.cbaul-cdnwnd.com/fbf05fcc8064ddefbfb57bdbcd633ca9/200000140-1021410216/1000183791-7.jpeg?ph=912ec8c7ff')"}} />
-      <div className="absolute inset-0" style={{background:'linear-gradient(to bottom, rgba(26,35,50,0.85), rgba(30,64,175,0.60), rgba(26,35,50,0.90))'}} />
-      <div className="hero-content text-center relative z-10 py-16">
-        <div className="max-w-2xl">
-          <div className="mb-6">
-            <span className="inline-block font-semibold tracking-wider px-5 py-2.5 rounded-full text-sm shadow-md" style={{background:'rgba(200,164,94,0.9)', color:'#1a2332'}}>
-              +10 AÑOS DE EXPERIENCIA
-            </span>
-          </div>
-          <h1 className="text-4xl md:text-6xl font-extrabold text-white leading-tight mb-6">
-            Hacemos de tu idea{" "}
-            <span style={{color:'#c8a45e'}}>una realidad</span>
-          </h1>
-          <p className="text-lg md:text-xl mb-4 max-w-xl mx-auto" style={{color:'rgba(255,255,255,0.75)'}}>
-            Más allá de muros o reparaciones, construimos sueños. Empresa constructora en{" "}
-            <strong className="text-white">Santiago de Chile</strong> especializada en construcción, remodelaciones, soldadura y más.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center mt-8">
-            <button onClick={onOpenChat} className="btn btn-lg shadow-lg border-0" style={{background:'#ffffff', color:'#1e40af'}}>
-              💬 Solicitar Presupuesto
-            </button>
-            <button onClick={() => onNavigate("servicios")} className="btn btn-lg btn-outline" style={{borderColor:'rgba(255,255,255,0.4)', color:'white'}}>
-              Ver Servicios
-            </button>
-          </div>
-          <div className="mt-12 flex flex-wrap justify-center gap-6" style={{color:'rgba(255,255,255,0.65)'}}>
-            <div className="flex items-center gap-2"><span className="text-2xl">📍</span><span className="text-sm">Santiago, Chile</span></div>
-            <div className="flex items-center gap-2"><span className="text-2xl">✅</span><span className="text-sm">Proyectos a todo Chile</span></div>
-            <div className="flex items-center gap-2"><span className="text-2xl">🏆</span><span className="text-sm">Garantía en todos los trabajos</span></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+// ===== SERVICES RENDER =====
+function renderServices() {
+  var grid = document.getElementById('services-grid');
+  grid.innerHTML = SERVICIOS.map(function(s) {
+    return '<div style="background:rgba(247,243,237,0.6);border:1px solid rgba(0,0,0,0.06);border-radius:0.75rem;overflow:hidden;transition:box-shadow 0.3s,border-color 0.3s;" onmouseover="this.style.boxShadow=\'0 8px 24px rgba(0,0,0,0.1)\';this.style.borderColor=\'rgba(30,64,175,0.2)\'" onmouseout="this.style.boxShadow=\'none\';this.style.borderColor=\'rgba(0,0,0,0.06)\'">' +
+      '<div style="height:12rem;overflow:hidden;"><img src="' + s.imagen + '" alt="' + s.nombre + '" style="width:100%;height:100%;object-fit:cover;transition:transform 0.5s;" onmouseover="this.style.transform=\'scale(1.05)\'" onmouseout="this.style.transform=\'scale(1)\'" loading="lazy"></div>' +
+      '<div style="padding:1.25rem;">' +
+        '<div style="display:flex;align-items:flex-start;justify-content:space-between;">' +
+          '<h3 style="font-weight:600;font-size:1.0625rem;color:#1f2937;margin:0;display:flex;align-items:center;gap:0.5rem;"><span style="font-size:1.5rem;">' + s.icono + '</span>' + s.nombre + '</h3>' +
+        '</div>' +
+        '<p style="color:rgba(31,41,55,0.55);font-size:0.875rem;margin:0.5rem 0 0;">' + s.descripcion + '</p>' +
+        '<div style="margin-top:0.75rem;display:flex;flex-direction:column;gap:0.25rem;">' +
+          s.detalles.map(function(d) {
+            return '<div style="display:flex;align-items:center;gap:0.5rem;font-size:0.875rem;color:rgba(31,41,55,0.65);"><span style="color:#1e40af;flex-shrink:0;">✓</span><span>' + d + '</span></div>';
+          }).join('') +
+        '</div>' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:1rem;padding-top:0.75rem;border-top:1px solid rgba(0,0,0,0.06);">' +
+          '<div><span style="font-size:1.25rem;font-weight:700;color:#1e40af;">' + formatCLP(s.precioBase) + '</span><span style="color:rgba(31,41,55,0.45);font-size:0.875rem;margin-left:0.25rem;">/ ' + s.unidad + '</span></div>' +
+          '<button onclick="toggleChat()" style="padding:0.375rem 0.875rem;background:#1e40af;color:#fff;border:none;border-radius:0.375rem;font-size:0.8125rem;font-weight:600;cursor:pointer;transition:background 0.2s;" onmouseover="this.style.background=\'#1e3a8a\'" onmouseout="this.style.background=\'#1e40af\'">Cotizar</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
 }
 
-// ─── SERVICES ────────────────────────────────────────────────────────────────
-function Services({ onOpenChat }) {
-  return (
-    <section className="py-16 px-4 bg-white">
-      <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-12">
-          <span className="inline-block font-semibold text-sm px-4 py-1.5 rounded-full mb-3" style={{background:'rgba(30,64,175,0.1)', color:'#1e40af'}}>
-            NUESTROS SERVICIOS
-          </span>
-          <h2 className="text-3xl md:text-4xl font-bold text-base-content mb-3">Soluciones profesionales para tu proyecto</h2>
-          <p className="text-base-content/55 max-w-2xl mx-auto">Ofrecemos una amplia gama de servicios de construcción y remodelación con los más altos estándares de calidad.</p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {SERVICIOS.map(s => (
-            <div key={s.id} className="card border hover:shadow-lg transition-all duration-300 overflow-hidden group" style={{background:'rgba(247,243,237,0.6)', borderColor:'rgba(209,196,180,0.6)'}}>
-              <figure className="h-48 overflow-hidden">
-                <img src={s.imagen} alt={s.nombre} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
-              </figure>
-              <div className="card-body">
-                <div className="flex items-start justify-between">
-                  <h3 className="card-title text-base-content"><span className="text-2xl">{s.icono}</span>{s.nombre}</h3>
-                </div>
-                <p className="text-base-content/55 text-sm mt-1">{s.descripcion}</p>
-                <div className="mt-3 space-y-1">
-                  {s.detalles.map((d, i) => (
-                    <div key={i} className="flex items-center gap-2 text-sm text-base-content/65">
-                      <CheckCircle size={14} style={{color:'#1e40af'}} className="shrink-0" />
-                      <span>{d}</span>
-                    </div>
-                  ))}
-                </div>
-                <div className="card-actions justify-between items-center mt-4 pt-3 border-t" style={{borderColor:'rgba(209,196,180,0.6)'}}>
-                  <div>
-                    <span className="text-xl font-bold" style={{color:'#1e40af'}}>{formatCLP(s.precioBase)}</span>
-                    <span className="text-base-content/45 text-sm ml-1">/ {s.unidad}</span>
-                  </div>
-                  <button onClick={onOpenChat} className="btn btn-sm text-white border-0" style={{background:'#1e40af'}}>Cotizar</button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
+// ===== PORTFOLIO RENDER + LIGHTBOX =====
+var currentLightbox = null;
+function renderPortfolio() {
+  var grid = document.getElementById('portfolio-grid');
+  grid.innerHTML = PORTFOLIO_IMAGES.map(function(img, i) {
+    return '<div onclick="openLightbox(' + i + ')" style="aspect-ratio:1;overflow:hidden;border-radius:0.75rem;cursor:pointer;position:relative;box-shadow:0 1px 3px rgba(0,0,0,0.08);transition:box-shadow 0.2s;" onmouseover="this.style.boxShadow=\'0 4px 12px rgba(0,0,0,0.15)\'" onmouseout="this.style.boxShadow=\'0 1px 3px rgba(0,0,0,0.08)\'">' +
+      '<img src="' + img + '" alt="Proyecto ' + (i+1) + '" style="width:100%;height:100%;object-fit:cover;transition:transform 0.5s;" onmouseover="this.style.transform=\'scale(1.1)\'" onmouseout="this.style.transform=\'scale(1)\'" loading="lazy">' +
+      '<div style="position:absolute;inset:0;background:rgba(30,64,175,0);transition:background 0.3s;display:flex;align-items:center;justify-content:center;" onmouseover="this.style.background=\'rgba(30,64,175,0.3)\';this.querySelector(\'span\').style.opacity=1" onmouseout="this.style.background=\'rgba(30,64,175,0)\';this.querySelector(\'span\').style.opacity=0"><span style="color:#fff;opacity:0;transition:opacity 0.3s;font-weight:500;font-size:0.8125rem;background:rgba(30,64,175,0.6);padding:0.25rem 0.75rem;border-radius:9999px;">Ver imagen</span></div>' +
+    '</div>';
+  }).join('');
+}
+function openLightbox(i) {
+  currentLightbox = i;
+  document.getElementById('lightbox').style.display = 'flex';
+  document.getElementById('lightbox-img').src = PORTFOLIO_IMAGES[i];
+  document.getElementById('lightbox-counter').textContent = (i+1) + ' / ' + PORTFOLIO_IMAGES.length;
+  document.body.style.overflow = 'hidden';
+}
+function closeLightbox() {
+  document.getElementById('lightbox').style.display = 'none';
+  currentLightbox = null;
+  document.body.style.overflow = '';
+}
+function prevImage() {
+  if (currentLightbox === null) return;
+  currentLightbox = (currentLightbox - 1 + PORTFOLIO_IMAGES.length) % PORTFOLIO_IMAGES.length;
+  document.getElementById('lightbox-img').src = PORTFOLIO_IMAGES[currentLightbox];
+  document.getElementById('lightbox-counter').textContent = (currentLightbox+1) + ' / ' + PORTFOLIO_IMAGES.length;
+}
+function nextImage() {
+  if (currentLightbox === null) return;
+  currentLightbox = (currentLightbox + 1) % PORTFOLIO_IMAGES.length;
+  document.getElementById('lightbox-img').src = PORTFOLIO_IMAGES[currentLightbox];
+  document.getElementById('lightbox-counter').textContent = (currentLightbox+1) + ' / ' + PORTFOLIO_IMAGES.length;
+}
+document.addEventListener('keydown', function(e) {
+  if (currentLightbox === null) return;
+  if (e.key === 'Escape') closeLightbox();
+  if (e.key === 'ArrowLeft') prevImage();
+  if (e.key === 'ArrowRight') nextImage();
+});
+
+// ===== FAQ RENDER =====
+function renderFAQ() {
+  var container = document.getElementById('faq-container');
+  container.innerHTML = FAQ_ITEMS.map(function(faq, i) {
+    return '<div style="background:rgba(247,243,237,0.7);border:1px solid rgba(0,0,0,0.05);border-radius:0.5rem;overflow:hidden;">' +
+      '<button onclick="toggleFaq(' + i + ')" style="width:100%;padding:0.75rem 1rem;background:none;border:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;text-align:left;font-weight:500;font-size:0.875rem;color:#1f2937;">' +
+        '<span>' + faq.pregunta + '</span>' +
+        '<span id="faq-arrow-' + i + '" class="faq-arrow" style="font-size:0.75rem;color:rgba(31,41,55,0.5);">▼</span>' +
+      '</button>' +
+      '<div id="faq-answer-' + i + '" class="faq-answer"><p style="font-size:0.875rem;color:rgba(31,41,55,0.65);margin:0;line-height:1.5;">' + faq.respuesta + '</p></div>' +
+    '</div>';
+  }).join('');
+}
+var openFaqIndex = null;
+function toggleFaq(i) {
+  if (openFaqIndex !== null && openFaqIndex !== i) {
+    document.getElementById('faq-answer-' + openFaqIndex).classList.remove('open');
+    document.getElementById('faq-arrow-' + openFaqIndex).classList.remove('open');
+  }
+  var answer = document.getElementById('faq-answer-' + i);
+  var arrow = document.getElementById('faq-arrow-' + i);
+  if (openFaqIndex === i) { answer.classList.remove('open'); arrow.classList.remove('open'); openFaqIndex = null; }
+  else { answer.classList.add('open'); arrow.classList.add('open'); openFaqIndex = i; }
 }
 
-// ─── PORTFOLIO ───────────────────────────────────────────────────────────────
-function Portfolio() {
-  const [selected, setSelected] = useState(null);
-  const openImage = (i) => setSelected(i);
-  const closeImage = () => setSelected(null);
-  const prev = () => setSelected(s => s !== null ? (s - 1 + PORTFOLIO_IMAGES.length) % PORTFOLIO_IMAGES.length : null);
-  const next = () => setSelected(s => s !== null ? (s + 1) % PORTFOLIO_IMAGES.length : null);
-
-  return (
-    <section className="py-16 px-4 bg-base-200">
-      <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-12">
-          <span className="inline-block font-semibold text-sm px-4 py-1.5 rounded-full mb-3" style={{background:'rgba(30,64,175,0.1)', color:'#1e40af'}}>
-            PORTAFOLIO
-          </span>
-          <h2 className="text-3xl md:text-4xl font-bold text-base-content mb-3">Nuestro Trabajo</h2>
-          <p className="text-base-content/55 max-w-2xl mx-auto">Más de 10 años construyendo sueños. Conoce algunos de nuestros proyectos completados en Santiago y el resto de Chile.</p>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-          {PORTFOLIO_IMAGES.map((img, i) => (
-            <div key={i} className="aspect-square overflow-hidden rounded-xl cursor-pointer group relative shadow-sm hover:shadow-md transition-shadow" onClick={() => openImage(i)}>
-              <img src={img} alt={`Proyecto ${i+1}`} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" loading="lazy" />
-              <div className="absolute inset-0 flex items-center justify-center transition-colors duration-300" style={{background:'rgba(30,64,175,0)'}}>
-                <span className="text-white opacity-0 group-hover:opacity-100 transition-opacity font-medium text-sm px-3 py-1 rounded-full" style={{background:'rgba(30,64,175,0.6)'}}>Ver imagen</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-      {selected !== null && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" style={{background:'rgba(0,0,0,0.9)'}} onClick={closeImage}>
-          <button className="absolute top-4 right-4 btn btn-circle btn-ghost text-white" onClick={closeImage}><X size={24} /></button>
-          <button className="absolute left-2 md:left-6 btn btn-circle btn-ghost text-white" onClick={e => { e.stopPropagation(); prev(); }}><ChevronLeft size={28} /></button>
-          <img src={PORTFOLIO_IMAGES[selected]} alt={`Proyecto ${selected+1}`} className="max-h-[85vh] max-w-[90vw] object-contain rounded-lg shadow-2xl" onClick={e => e.stopPropagation()} />
-          <button className="absolute right-2 md:right-6 btn btn-circle btn-ghost text-white" onClick={e => { e.stopPropagation(); next(); }}><ChevronRight size={28} /></button>
-          <div className="absolute bottom-4 text-sm" style={{color:'rgba(255,255,255,0.6)'}}>{selected + 1} / {PORTFOLIO_IMAGES.length}</div>
-        </div>
-      )}
-    </section>
-  );
+// ===== CONTACT FORM =====
+function handleContactSubmit(e) {
+  e.preventDefault();
+  var s = document.getElementById('contact-success');
+  s.style.display = 'block';
+  e.target.reset();
+  setTimeout(function() { s.style.display = 'none'; }, 4000);
 }
 
-// ─── ABOUT ───────────────────────────────────────────────────────────────────
-function About() {
-  const stats = [
-    { icon: <Clock size={28} />, value: "+10", label: "Años de experiencia" },
-    { icon: <Users size={28} />, value: "+500", label: "Proyectos completados" },
-    { icon: <Award size={28} />, value: "100%", label: "Compromiso" },
-    { icon: <Shield size={28} />, value: "5 años", label: "Garantía estructural" },
-  ];
-  return (
-    <section className="py-16 px-4 bg-white">
-      <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-12">
-          <span className="inline-block font-semibold text-sm px-4 py-1.5 rounded-full mb-3" style={{background:'rgba(30,64,175,0.1)', color:'#1e40af'}}>
-            SOBRE NOSOTROS
-          </span>
-          <h2 className="text-3xl md:text-4xl font-bold text-base-content mb-3">Construcción & Servicios ZF</h2>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center mb-12">
-          <div>
-            <div className="rounded-xl shadow-lg bg-white border border-base-200 flex items-center justify-center p-4" style={{minHeight:'320px'}}>
-              <img
-                src="https://912ec8c7ff.cbaul-cdnwnd.com/fbf05fcc8064ddefbfb57bdbcd633ca9/200000081-aead9aeadb/1000183641-1.jpeg?ph=912ec8c7ff"
-                alt="Logo Construcción & Servicios ZF"
-                className="w-full max-w-sm object-contain"
-                style={{maxHeight:'400px'}}
-                loading="lazy"
-              />
-            </div>
-          </div>
-          <div className="space-y-4">
-            <p className="text-base-content/75 leading-relaxed">
-              Somos una empresa constructora con <strong className="text-base-content">más de 10 años de experiencia</strong> en el rubro de la construcción general y servicios relacionados. Nos enfocamos en ofrecer un servicio de alta calidad, cumpliendo con los plazos establecidos y superando las expectativas de nuestros clientes.
-            </p>
-            <p className="text-base-content/75 leading-relaxed">
-              Ubicados en la <strong className="text-base-content">Región Metropolitana de Santiago</strong>, esto no es una limitante ya que aceptamos proyectos a lo largo de todo Chile. Ofrecemos servicios a clientes de diferentes sectores y tamaños.
-            </p>
-            <p className="text-base-content/75 leading-relaxed">
-              Nuestro equipo altamente calificado y comprometido nos permite brindar proyectos de alta calidad tratando cada proyecto como si fuera propio.
-            </p>
-          </div>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {stats.map((s, i) => (
-            <div key={i} className="card text-center p-6 hover:shadow-md transition-shadow border" style={{background:'rgba(247,243,237,0.7)', borderColor:'rgba(209,196,180,0.5)'}}>
-              <div className="mx-auto mb-2" style={{color:'#1e40af'}}>{s.icon}</div>
-              <div className="text-2xl font-bold text-base-content">{s.value}</div>
-              <div className="text-sm text-base-content/55">{s.label}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
+// ===== CHATBOT =====
+var chatOpen = false;
+var chatInitialized = false;
+var chatStep = 'welcome';
+var chatMessages = [];
+var budget = { servicio:'', cantidad:0, nombre:'', telefono:'', email:'', descripcion:'', comuna:'' };
 
-// ─── CONTACT ─────────────────────────────────────────────────────────────────
-function Contact({ onOpenChat }) {
-  const [openFaq, setOpenFaq] = useState(null);
-  const [form, setForm] = useState({ nombre:"", email:"", telefono:"", mensaje:"" });
-  const [sent, setSent] = useState(false);
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setSent(true);
-    setTimeout(() => setSent(false), 4000);
-    setForm({ nombre:"", email:"", telefono:"", mensaje:"" });
-  };
-  return (
-    <section className="py-16 px-4 bg-base-200">
-      <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-12">
-          <span className="inline-block font-semibold text-sm px-4 py-1.5 rounded-full mb-3" style={{background:'rgba(30,64,175,0.1)', color:'#1e40af'}}>
-            CONTACTO
-          </span>
-          <h2 className="text-3xl md:text-4xl font-bold text-base-content mb-3">¿Tienes un proyecto en mente?</h2>
-          <p className="text-base-content/55 max-w-2xl mx-auto">Contáctanos y te responderemos a la brevedad. También puedes usar nuestro asistente virtual para una cotización rápida.</p>
-        </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="card bg-white shadow-sm border border-base-300/50">
-            <div className="card-body">
-              <h3 className="card-title text-base-content mb-4"><Send size={20} style={{color:'#1e40af'}} />Envíanos un mensaje</h3>
-              {sent && <div className="alert alert-success text-sm mb-3">✅ ¡Mensaje enviado! Te contactaremos pronto.</div>}
-              <form onSubmit={handleSubmit} className="space-y-3">
-                <input type="text" placeholder="Tu nombre" className="input input-bordered w-full bg-base-200/50" value={form.nombre} onChange={e => setForm({...form, nombre:e.target.value})} required />
-                <input type="email" placeholder="Tu email" className="input input-bordered w-full bg-base-200/50" value={form.email} onChange={e => setForm({...form, email:e.target.value})} required />
-                <input type="tel" placeholder="Tu teléfono" className="input input-bordered w-full bg-base-200/50" value={form.telefono} onChange={e => setForm({...form, telefono:e.target.value})} />
-                <textarea placeholder="Cuéntanos sobre tu proyecto..." className="textarea textarea-bordered w-full h-28 bg-base-200/50" value={form.mensaje} onChange={e => setForm({...form, mensaje:e.target.value})} required />
-                <button type="submit" className="btn w-full text-white border-0" style={{background:'#1e40af'}}>Enviar mensaje</button>
-              </form>
-            </div>
-          </div>
-          <div className="space-y-6">
-            <div className="card bg-white shadow-sm border border-base-300/50">
-              <div className="card-body space-y-3">
-                <div className="flex items-center gap-3">
-                  <div className="rounded-full p-2.5" style={{background:'rgba(30,64,175,0.1)'}}><MapPin size={20} style={{color:'#1e40af'}} /></div>
-                  <div><p className="font-semibold text-base-content">Ubicación</p><p className="text-sm text-base-content/55">Santiago, Región Metropolitana, Chile</p></div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="rounded-full p-2.5" style={{background:'rgba(30,64,175,0.1)'}}><Mail size={20} style={{color:'#1e40af'}} /></div>
-                  <div><p className="font-semibold text-base-content">Email</p><p className="text-sm text-base-content/55">construcctorayservicios@gmail.com</p></div>
-                </div>
-                <button onClick={onOpenChat} className="btn btn-outline w-full mt-2" style={{borderColor:'#1e40af', color:'#1e40af'}}>💬 Chatear con nuestro asistente</button>
-              </div>
-            </div>
-            <div className="card bg-white shadow-sm border border-base-300/50">
-              <div className="card-body">
-                <h3 className="card-title text-base-content text-lg mb-2">Preguntas Frecuentes</h3>
-                <div className="space-y-2">
-                  {FAQ_ITEMS.map((faq, i) => (
-                    <div key={i} className="rounded-lg border overflow-hidden" style={{background:'rgba(247,243,237,0.7)', borderColor:'rgba(209,196,180,0.4)'}}>
-                      <button className="w-full text-left px-4 py-3 font-medium text-sm text-base-content flex justify-between items-center" onClick={() => setOpenFaq(openFaq === i ? null : i)}>
-                        {faq.pregunta}
-                        <span className="text-xs ml-2" style={{color:'#1e40af'}}>{openFaq === i ? '▲' : '▼'}</span>
-                      </button>
-                      {openFaq === i && <div className="px-4 pb-3 text-sm text-base-content/65">{faq.respuesta}</div>}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ─── FOOTER ──────────────────────────────────────────────────────────────────
-function Footer({ onNavigate }) {
-  return (
-    <footer style={{background:'#1a2332', color:'#c8c4bb'}}>
-      <div className="max-w-6xl mx-auto px-4 py-10">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div>
-            <h3 className="text-lg font-bold mb-3 text-white">🏗️ Construcción & Servicios ZF</h3>
-            <p className="text-sm leading-relaxed" style={{color:'#8a8680'}}>Más de 10 años construyendo sueños en Santiago de Chile y todo el país. Calidad, compromiso y profesionalismo en cada proyecto.</p>
-          </div>
-          <div>
-            <h4 className="font-semibold mb-3 text-white">Navegación</h4>
-            <ul className="space-y-1 text-sm">
-              {["inicio","servicios","portafolio","nosotros","contacto"].map(s => (
-                <li key={s}><button onClick={() => onNavigate(s)} className="capitalize transition-colors" style={{color:'#8a8680'}}
-                  onMouseOver={e => e.target.style.color='#c8a45e'} onMouseOut={e => e.target.style.color='#8a8680'}>{s}</button></li>
-              ))}
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-semibold mb-3 text-white">Contacto</h4>
-            <ul className="space-y-2 text-sm" style={{color:'#8a8680'}}>
-              <li>📍 Santiago, Región Metropolitana</li>
-              <li>📧 construcctorayservicios@gmail.com</li>
-              <li>📱 WhatsApp: Próximamente</li>
-              <li>📷 @Construccionyservicioszf.cl</li>
-            </ul>
-          </div>
-        </div>
-        <div className="border-t mt-8 pt-6 text-center text-sm" style={{borderColor:'rgba(255,255,255,0.1)', color:'#6a665f'}}>
-          © {new Date().getFullYear()} Construcción & Servicios ZF — Todos los derechos reservados.
-        </div>
-      </div>
-    </footer>
-  );
-}
-
-// ─── CHATBOT ─────────────────────────────────────────────────────────────────
-function TypingDots() {
-  return (
-    <div className="flex justify-start">
-      <div className="bg-base-100 rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm">
-        <div className="loading-dots">
-          <span></span><span></span><span></span>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function renderText(text) {
-  const parts = text.split(/(\*\*.*?\*\*)/g);
-  return parts.map((part, i) => {
-    if (part.startsWith("**") && part.endsWith("**")) {
-      return <strong key={i} className="font-bold">{part.slice(2,-2)}</strong>;
-    }
-    const italicParts = part.split(/(\*.*?\*)/g);
-    return italicParts.map((ip, j) => {
-      if (ip.startsWith("*") && ip.endsWith("*") && !ip.startsWith("**")) {
-        return <em key={`${i}-${j}`} className="italic text-base-content/50">{ip.slice(1,-1)}</em>;
-      }
-      return <span key={`${i}-${j}`}>{ip}</span>;
-    });
-  });
-}
-
-function Chatbot({ isOpen, onToggle }) {
-  const [messages, setMessages] = useState([]);
-  const [step, setStep] = useState("welcome");
-  const [inputValue, setInputValue] = useState("");
-  const [budget, setBudget] = useState({ servicio:"", cantidad:0, nombre:"", telefono:"", email:"", descripcion:"", comuna:"" });
-  const [typing, setTyping] = useState(false);
-  const messagesEndRef = useRef(null);
-  const initialized = useRef(false);
-
-  useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior:"smooth" }); }, [messages, typing]);
-
-  const addBotMessage = (text, options) => {
-    setTyping(true);
-    setTimeout(() => {
-      setTyping(false);
-      setMessages(prev => [...prev, { id:genId(), sender:"bot", text, options, timestamp:new Date() }]);
-    }, 600);
-  };
-
-  const addUserMessage = (text) => {
-    setMessages(prev => [...prev, { id:genId(), sender:"user", text, timestamp:new Date() }]);
-  };
-
-  useEffect(() => {
-    if (isOpen && !initialized.current) {
-      initialized.current = true;
+function toggleChat() {
+  chatOpen = !chatOpen;
+  var win = document.getElementById('chat-window');
+  var btn = document.getElementById('chat-toggle-btn');
+  if (chatOpen) {
+    win.style.display = 'flex';
+    btn.style.display = 'none';
+    if (!chatInitialized) {
+      chatInitialized = true;
       addBotMessage("👋 ¡Hola! Soy el asistente virtual de **Construcción & Servicios ZF**. ¿En qué puedo ayudarte hoy?", [
         { label:"Solicitar presupuesto", value:"presupuesto", emoji:"💰" },
         { label:"Ver servicios", value:"servicios", emoji:"🔧" },
         { label:"Preguntas frecuentes", value:"faq", emoji:"❓" },
-        { label:"Hablar con un asesor", value:"asesor", emoji:"👤" },
+        { label:"Hablar con un asesor", value:"asesor", emoji:"👤" }
       ]);
-      setStep("menu");
+      chatStep = 'menu';
     }
-  }, [isOpen]);
+  } else {
+    win.style.display = 'none';
+    btn.style.display = 'flex';
+  }
+}
 
-  const handleOption = (option) => { addUserMessage(option.label); processInput(option.value); };
-  const handleTextSubmit = () => {
-    if (!inputValue.trim()) return;
-    const val = inputValue.trim();
-    addUserMessage(val); setInputValue(""); processInput(val);
-  };
+function renderMarkdown(text) {
+  // Bold **text**
+  var html = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  // Italic *text*
+  html = html.replace(/\*([^*]+)\*/g, '<em style="color:rgba(31,41,55,0.5);">$1</em>');
+  // Newlines
+  html = html.replace(/\n/g, '<br>');
+  return html;
+}
 
-  const processInput = (value) => {
-    setStep(prev => {
-      switch(prev) {
-        case "menu": handleMenuChoice(value); return prev;
-        case "faq_menu": handleFaqChoice(value); return prev;
-        case "faq_answer": handleMenuChoice(value); return prev;
-        case "select_service": handleServiceSelect(value); return prev;
-        case "ask_cantidad": handleCantidad(value); return prev;
-        case "ask_comuna": handleComuna(value); return prev;
-        case "ask_descripcion": handleDescripcion(value); return prev;
-        case "ask_nombre": handleNombre(value); return prev;
-        case "ask_telefono": handleTelefono(value); return prev;
-        case "ask_email": handleEmail(value); return prev;
-        case "show_budget":
-        case "goodbye": handlePostBudget(value); return prev;
-        default: addBotMessage("No entendí tu mensaje. ¿Puedes intentar de nuevo?"); return prev;
-      }
+function addBotMessage(text, options) {
+  // Show typing indicator
+  var container = document.getElementById('chat-messages');
+  var typingEl = document.createElement('div');
+  typingEl.style.cssText = 'display:flex;justify-content:flex-start;';
+  typingEl.innerHTML = '<div style="background:#fff;border-radius:1rem;border-bottom-left-radius:0.25rem;padding:0.75rem 1rem;box-shadow:0 1px 3px rgba(0,0,0,0.06);"><span style="color:#1e40af;">●●●</span></div>';
+  typingEl.id = 'typing-indicator';
+  container.appendChild(typingEl);
+  container.scrollTop = container.scrollHeight;
+
+  setTimeout(function() {
+    var ti = document.getElementById('typing-indicator');
+    if (ti) ti.remove();
+
+    var msg = { id:genId(), sender:'bot', text:text, options:options||[] };
+    chatMessages.push(msg);
+    renderChatMessage(msg);
+    updateChatInput();
+  }, 600);
+}
+
+function addUserMessage(text) {
+  var msg = { id:genId(), sender:'user', text:text, options:[] };
+  chatMessages.push(msg);
+  renderChatMessage(msg);
+}
+
+function renderChatMessage(msg) {
+  var container = document.getElementById('chat-messages');
+  var div = document.createElement('div');
+  div.style.cssText = 'display:flex;' + (msg.sender === 'user' ? 'justify-content:flex-end;' : 'justify-content:flex-start;');
+
+  var bubble = document.createElement('div');
+  bubble.style.cssText = 'max-width:85%;border-radius:1rem;padding:0.625rem 1rem;font-size:0.875rem;line-height:1.5;white-space:pre-line;';
+  if (msg.sender === 'user') {
+    bubble.style.cssText += 'background:#1e40af;color:#fff;border-bottom-right-radius:0.25rem;';
+  } else {
+    bubble.style.cssText += 'background:#fff;color:#1f2937;box-shadow:0 1px 3px rgba(0,0,0,0.06);border-bottom-left-radius:0.25rem;';
+  }
+  bubble.innerHTML = renderMarkdown(msg.text);
+
+  if (msg.options && msg.options.length > 0) {
+    var optsDiv = document.createElement('div');
+    optsDiv.style.cssText = 'margin-top:0.75rem;display:flex;flex-direction:column;gap:0.375rem;';
+    msg.options.forEach(function(opt) {
+      var btn = document.createElement('button');
+      btn.style.cssText = 'width:100%;text-align:left;padding:0.5rem 0.75rem;background:transparent;color:#1e40af;border:1px solid #1e40af;border-radius:0.375rem;font-size:0.75rem;cursor:pointer;transition:all 0.2s;font-family:inherit;';
+      btn.innerHTML = (opt.emoji ? '<span style="margin-right:0.25rem;">' + opt.emoji + '</span>' : '') + opt.label;
+      btn.onmouseover = function() { this.style.background='#1e40af'; this.style.color='#fff'; };
+      btn.onmouseout = function() { this.style.background='transparent'; this.style.color='#1e40af'; };
+      btn.onclick = function() { handleChatOption(opt); };
+      optsDiv.appendChild(btn);
     });
-  };
+    bubble.appendChild(optsDiv);
+  }
 
-  const handleMenuChoice = (value) => {
-    switch(value) {
-      case "presupuesto":
-        addBotMessage("¡Genial! Vamos a preparar tu presupuesto. Primero, ¿qué servicio necesitas?",
-          SERVICIOS.map(s => ({ label:`${s.icono} ${s.nombre}`, value:s.id })));
-        setStep("select_service"); break;
-      case "servicios":
-        let msg = "📋 **Nuestros servicios:**\n\n";
-        SERVICIOS.forEach(s => { msg += `${s.icono} **${s.nombre}**\n${formatCLP(s.precioBase)} por ${s.unidad}\n\n`; });
-        msg += "¿Te gustaría cotizar alguno de estos servicios?";
-        addBotMessage(msg, [
-          { label:"Sí, quiero cotizar", value:"presupuesto", emoji:"💰" },
-          { label:"Volver al menú", value:"volver_menu", emoji:"↩️" },
-        ]);
-        setStep("faq_answer"); break;
-      case "faq":
-        addBotMessage("¿Qué te gustaría saber?", FAQ_ITEMS.map((f,i) => ({ label:f.pregunta, value:`faq_${i}`, emoji:"📌" })));
-        setStep("faq_menu"); break;
-      case "asesor":
-        addBotMessage("📞 Puedes contactar a nuestro equipo directamente:\n\n📧 **Email:** construcctorayservicios@gmail.com\n📷 **Instagram:** @Construccionyservicioszf.cl\n\n📱 **WhatsApp:** Próximamente\n\nTe responderemos a la brevedad. ¿Hay algo más en lo que pueda ayudarte?", [
-          { label:"Solicitar presupuesto", value:"presupuesto", emoji:"💰" },
-          { label:"Volver al menú", value:"volver_menu", emoji:"↩️" },
-        ]);
-        setStep("faq_answer"); break;
-      case "volver_menu":
-        addBotMessage("¿En qué más puedo ayudarte?", [
-          { label:"Solicitar presupuesto", value:"presupuesto", emoji:"💰" },
-          { label:"Ver servicios", value:"servicios", emoji:"🔧" },
-          { label:"Preguntas frecuentes", value:"faq", emoji:"❓" },
-          { label:"Hablar con un asesor", value:"asesor", emoji:"👤" },
-        ]);
-        setStep("menu"); break;
-      default:
-        addBotMessage("Por favor selecciona una opción.", [
-          { label:"Solicitar presupuesto", value:"presupuesto", emoji:"💰" },
-          { label:"Volver al menú", value:"volver_menu", emoji:"↩️" },
-        ]);
-        setStep("menu");
-    }
-  };
-
-  const handleFaqChoice = (value) => {
-    if (value.startsWith("faq_")) {
-      const idx = parseInt(value.split("_")[1]);
-      const faq = FAQ_ITEMS[idx];
-      if (faq) {
-        addBotMessage(`📌 **${faq.pregunta}**\n\n${faq.respuesta}\n\n¿Necesitas algo más?`, [
-          { label:"Otra pregunta", value:"faq", emoji:"❓" },
-          { label:"Solicitar presupuesto", value:"presupuesto", emoji:"💰" },
-          { label:"Volver al menú", value:"volver_menu", emoji:"↩️" },
-        ]);
-        setStep("faq_answer");
-      }
-    } else { handleMenuChoice(value); }
-  };
-
-  const handleServiceSelect = (value) => {
-    const servicio = SERVICIOS.find(s => s.id === value);
-    if (servicio) {
-      setBudget(prev => ({ ...prev, servicio: servicio.id }));
-      const unitLabel = servicio.unidad === "m²" ? "¿Cuántos metros cuadrados (m²) aproximados necesitas?"
-        : servicio.unidad === "ml" ? "¿Cuántos metros lineales aproximados necesitas?"
-        : "¿Cuántos proyectos/unidades necesitas? (escribe 1 si es un solo trabajo)";
-      addBotMessage(`✅ **${servicio.nombre}** — ${formatCLP(servicio.precioBase)}/${servicio.unidad}\n\n${unitLabel}\n\n💡 *Escribe un número aproximado, no te preocupes si no es exacto.*`);
-      setStep("ask_cantidad");
-    }
-  };
-
-  const handleCantidad = (value) => {
-    const num = parseFloat(value.replace(/[^\d.,]/g,"").replace(",","."));
-    if (isNaN(num) || num <= 0) { addBotMessage("⚠️ Por favor ingresa un número válido mayor a 0. Por ejemplo: 25"); return; }
-    setBudget(prev => ({ ...prev, cantidad: num }));
-    addBotMessage(`📐 Perfecto.\n\n¿En qué comuna de Santiago se realizaría el trabajo?`,
-      COMUNAS_SANTIAGO.slice(0,8).map(c => ({ label:c, value:c })));
-    setStep("ask_comuna");
-  };
-
-  const handleComuna = (value) => {
-    setBudget(prev => ({ ...prev, comuna: value }));
-    addBotMessage(`📍 **${value}**, anotado.\n\n¿Puedes darnos una breve descripción del trabajo que necesitas?`);
-    setStep("ask_descripcion");
-  };
-
-  const handleDescripcion = (value) => {
-    setBudget(prev => ({ ...prev, descripcion: value }));
-    addBotMessage("👤 ¿Cuál es tu nombre completo?");
-    setStep("ask_nombre");
-  };
-
-  const handleNombre = (value) => {
-    setBudget(prev => ({ ...prev, nombre: value }));
-    addBotMessage("📱 ¿Tu número de teléfono?");
-    setStep("ask_telefono");
-  };
-
-  const handleTelefono = (value) => {
-    setBudget(prev => ({ ...prev, telefono: value }));
-    addBotMessage("📧 Por último, ¿tu correo electrónico? (escribe 'no' si prefieres no darlo)");
-    setStep("ask_email");
-  };
-
-  const handleEmail = (value) => {
-    const email = value.toLowerCase() === "no" ? "No proporcionado" : value;
-    const updatedBudget = { ...budget, email };
-    setBudget(updatedBudget);
-    const servicio = SERVICIOS.find(s => s.id === updatedBudget.servicio);
-    if (!servicio) return;
-    const subtotal = servicio.precioBase * updatedBudget.cantidad;
-    const iva = Math.round(subtotal * 0.19);
-    const total = subtotal + iva;
-    const resumen =
-      `🧾 **PRESUPUESTO ESTIMADO**\n━━━━━━━━━━━━━━━━━━━━━━\n\n` +
-      `🔧 **Servicio:** ${servicio.nombre}\n` +
-      `📐 **Cantidad:** ${updatedBudget.cantidad} ${servicio.unidad}\n` +
-      `💲 **Precio unitario:** ${formatCLP(servicio.precioBase)}/${servicio.unidad}\n` +
-      `📍 **Comuna:** ${updatedBudget.comuna}\n\n` +
-      `━━━━━━━━━━━━━━━━━━━━━━\n` +
-      `**Subtotal:** ${formatCLP(subtotal)}\n` +
-      `**IVA (19%):** ${formatCLP(iva)}\n` +
-      `**💰 TOTAL ESTIMADO: ${formatCLP(total)}**\n` +
-      `━━━━━━━━━━━━━━━━━━━━━━\n\n` +
-      `👤 **Cliente:** ${updatedBudget.nombre}\n` +
-      `📱 **Teléfono:** ${updatedBudget.telefono}\n` +
-      `📧 **Email:** ${email}\n` +
-      `📝 **Descripción:** ${updatedBudget.descripcion}\n\n` +
-      `⚠️ *Este es un presupuesto estimado. El precio final puede variar según la visita técnica.*\n\n¿Qué te gustaría hacer?`;
-    addBotMessage(resumen, [
-      { label:"📞 Contactar por WhatsApp", value:"whatsapp", emoji:"📱" },
-      { label:"📧 Enviar por email", value:"email_budget", emoji:"📧" },
-      { label:"Nueva cotización", value:"nueva", emoji:"🔄" },
-      { label:"Volver al menú", value:"volver_menu", emoji:"↩️" },
-    ]);
-    setStep("show_budget");
-  };
-
-  const handlePostBudget = (value) => {
-    switch(value) {
-      case "whatsapp":
-        addBotMessage("📱 **WhatsApp aún no configurado.**\n\nPor ahora puedes escribirnos a:\n📧 construcctorayservicios@gmail.com\n\n¿Algo más?", [
-          { label:"Nueva cotización", value:"nueva", emoji:"🔄" },
-          { label:"Volver al menú", value:"volver_menu", emoji:"↩️" },
-        ]);
-        setStep("goodbye"); break;
-      case "email_budget":
-        addBotMessage("📧 ¡Listo! Hemos registrado tu solicitud. Nuestro equipo te contactará dentro de las próximas **24 horas hábiles**.\n\n¿Algo más?", [
-          { label:"Nueva cotización", value:"nueva", emoji:"🔄" },
-          { label:"Volver al menú", value:"volver_menu", emoji:"↩️" },
-        ]);
-        setStep("goodbye"); break;
-      case "nueva":
-        setBudget({ servicio:"", cantidad:0, nombre:"", telefono:"", email:"", descripcion:"", comuna:"" });
-        handleMenuChoice("presupuesto"); break;
-      default: handleMenuChoice(value);
-    }
-  };
-
-  const showInput = ["ask_cantidad","ask_comuna","ask_descripcion","ask_nombre","ask_telefono","ask_email"].includes(step);
-
-  return (
-    <>
-      {!isOpen && (
-        <button onClick={onToggle} className="fixed bottom-6 right-6 z-50 btn btn-circle btn-lg shadow-xl"
-          style={{background:'#1e40af', color:'white', border:'none', animation:'bounce 2s infinite'}}>
-          <MessageCircle size={28} />
-        </button>
-      )}
-      {isOpen && (
-        <div className="fixed bottom-0 right-0 md:bottom-4 md:right-4 z-50 w-full md:w-96 flex flex-col bg-base-100 md:rounded-xl shadow-2xl border border-base-300"
-          style={{height:'100dvh', maxHeight:'100dvh'}}
-          onMouseEnter={e => { e.currentTarget.style.height = '600px'; e.currentTarget.style.maxHeight='80vh'; }}
-          onMouseLeave={e => { if(window.innerWidth < 768){ e.currentTarget.style.height='100dvh'; e.currentTarget.style.maxHeight='100dvh'; }}}>
-
-          {/* Header */}
-          <div className="p-4 md:rounded-t-xl flex items-center justify-between shrink-0 text-white"
-            style={{background:'linear-gradient(to right, #1a2332, #1e40af)'}}>
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg" style={{background:'rgba(255,255,255,0.2)'}}>🏗️</div>
-              <div>
-                <p className="font-bold text-sm">Asistente ZF</p>
-                <p className="text-xs" style={{color:'rgba(255,255,255,0.7)'}}>En línea • Respuesta inmediata</p>
-              </div>
-            </div>
-            <button onClick={onToggle} className="btn btn-ghost btn-sm btn-circle text-white"><X size={20} /></button>
-          </div>
-
-          {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-3" style={{background:'rgba(247,243,237,0.5)'}}>
-            {messages.map(msg => (
-              <div key={msg.id} className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}>
-                <div className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed whitespace-pre-line ${
-                  msg.sender === "user" ? "text-white rounded-br-sm" : "bg-base-100 text-base-content shadow-sm rounded-bl-sm"
-                }`} style={msg.sender === "user" ? {background:'#1e40af'} : {}}>
-                  {renderText(msg.text)}
-                  {msg.options && msg.options.length > 0 && (
-                    <div className="mt-3 space-y-1.5">
-                      {msg.options.map(opt => (
-                        <button key={opt.value} onClick={() => handleOption(opt)}
-                          className="btn btn-sm btn-outline w-full justify-start text-left font-normal text-xs h-auto py-2"
-                          style={{borderColor:'#1e40af', color:'#1e40af'}}>
-                          {opt.emoji && <span className="mr-1">{opt.emoji}</span>}
-                          {opt.label}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-            {typing && <TypingDots />}
-            <div ref={messagesEndRef} />
-          </div>
-
-          {/* Input */}
-          <div className="p-3 bg-base-100 border-t border-base-300 md:rounded-b-xl shrink-0">
-            {showInput ? (
-              <form onSubmit={e => { e.preventDefault(); handleTextSubmit(); }} className="flex gap-2">
-                <input type="text" className="input input-bordered input-sm flex-1" placeholder="Escribe tu respuesta..."
-                  value={inputValue} onChange={e => setInputValue(e.target.value)} autoFocus />
-                <button type="submit" className="btn btn-sm btn-circle text-white border-0" style={{background:'#1e40af'}}><Send size={16} /></button>
-              </form>
-            ) : (
-              <p className="text-xs text-center text-base-content/40">Selecciona una opción del chat ☝️</p>
-            )}
-          </div>
-        </div>
-      )}
-    </>
-  );
+  div.appendChild(bubble);
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
 }
 
-// ─── APP ─────────────────────────────────────────────────────────────────────
-function App() {
-  const [activeSection, setActiveSection] = useState("inicio");
-  const [chatOpen, setChatOpen] = useState(false);
-
-  const sectionRefs = {
-    inicio: useRef(null),
-    servicios: useRef(null),
-    portafolio: useRef(null),
-    nosotros: useRef(null),
-    contacto: useRef(null),
-  };
-
-  const navigateTo = useCallback((section) => {
-    const ref = sectionRefs[section];
-    if (ref?.current) {
-      ref.current.scrollIntoView({ behavior:"smooth" });
-      setActiveSection(section);
-    }
-  }, []);
-
-  const toggleChat = useCallback(() => setChatOpen(prev => !prev), []);
-
-  return (
-    <div className="min-h-screen bg-base-100">
-      <Navbar activeSection={activeSection} onNavigate={navigateTo} />
-      <div ref={sectionRefs.inicio}><Hero onNavigate={navigateTo} onOpenChat={toggleChat} /></div>
-      <div ref={sectionRefs.servicios} className="section-animate"><Services onOpenChat={toggleChat} /></div>
-      <div ref={sectionRefs.portafolio} className="section-animate"><Portfolio /></div>
-      <div ref={sectionRefs.nosotros} className="section-animate"><About /></div>
-      <div ref={sectionRefs.contacto} className="section-animate"><Contact onOpenChat={toggleChat} /></div>
-      <Footer onNavigate={navigateTo} />
-      <Chatbot isOpen={chatOpen} onToggle={toggleChat} />
-    </div>
-  );
+function updateChatInput() {
+  var showInput = ['ask_cantidad','ask_comuna','ask_descripcion','ask_nombre','ask_telefono','ask_email'].indexOf(chatStep) >= 0;
+  document.getElementById('chat-hint').style.display = showInput ? 'none' : 'block';
+  document.getElementById('chat-form').style.display = showInput ? 'flex' : 'none';
+  if (showInput) {
+    var inp = document.getElementById('chat-input');
+    inp.value = '';
+    setTimeout(function() { inp.focus(); }, 100);
+  }
 }
 
-createRoot(document.getElementById("root")).render(<App />);
+function handleChatOption(opt) {
+  addUserMessage(opt.label);
+  processInput(opt.value);
+}
+
+function handleChatSubmit(e) {
+  e.preventDefault();
+  var inp = document.getElementById('chat-input');
+  var val = inp.value.trim();
+  if (!val) return;
+  addUserMessage(val);
+  inp.value = '';
+  processInput(val);
+}
+
+function processInput(value) {
+  switch (chatStep) {
+    case 'menu': handleMenuChoice(value); break;
+    case 'faq_menu': handleFaqChoice(value); break;
+    case 'faq_answer': handleMenuChoice(value); break;
+    case 'select_service': handleServiceSelect(value); break;
+    case 'ask_cantidad': handleCantidad(value); break;
+    case 'ask_comuna': handleComuna(value); break;
+    case 'ask_descripcion': handleDescripcion(value); break;
+    case 'ask_nombre': handleNombre(value); break;
+    case 'ask_telefono': handleTelefono(value); break;
+    case 'ask_email': handleEmail(value); break;
+    case 'show_budget': case 'goodbye': handlePostBudget(value); break;
+    default: addBotMessage("No entendí tu mensaje. ¿Puedes intentar de nuevo?");
+  }
+}
+
+function handleMenuChoice(value) {
+  switch (value) {
+    case 'presupuesto':
+      addBotMessage("¡Genial! Vamos a preparar tu presupuesto. Primero, ¿qué servicio necesitas?",
+        SERVICIOS.map(function(s) { return { label: s.icono + ' ' + s.nombre, value: s.id }; })
+      );
+      chatStep = 'select_service';
+      break;
+    case 'servicios':
+      var msg = "📋 **Nuestros servicios:**\n\n";
+      SERVICIOS.forEach(function(s) { msg += s.icono + " **" + s.nombre + "**\n" + formatCLP(s.precioBase) + " por " + s.unidad + "\n\n"; });
+      msg += "¿Te gustaría cotizar alguno de estos servicios?";
+      addBotMessage(msg, [
+        { label:"Sí, quiero cotizar", value:"presupuesto", emoji:"💰" },
+        { label:"Volver al menú", value:"volver_menu", emoji:"↩️" }
+      ]);
+      chatStep = 'faq_answer';
+      break;
+    case 'faq':
+      addBotMessage("¿Qué te gustaría saber?",
+        FAQ_ITEMS.map(function(f, i) { return { label: f.pregunta, value: 'faq_' + i, emoji: '📌' }; })
+      );
+      chatStep = 'faq_menu';
+      break;
+    case 'asesor':
+      addBotMessage("📞 Puedes contactar a nuestro equipo directamente:\n\n📧 **Email:** construcctorayservicios@gmail.com\n📷 **Instagram:** @Construccionyservicioszf.cl\n\n📱 **WhatsApp:** Próximamente\n\nTe responderemos a la brevedad. ¿Hay algo más en lo que pueda ayudarte?", [
+        { label:"Solicitar presupuesto", value:"presupuesto", emoji:"💰" },
+        { label:"Volver al menú", value:"volver_menu", emoji:"↩️" }
+      ]);
+      chatStep = 'faq_answer';
+      break;
+    case 'volver_menu':
+      addBotMessage("¿En qué más puedo ayudarte?", [
+        { label:"Solicitar presupuesto", value:"presupuesto", emoji:"💰" },
+        { label:"Ver servicios", value:"servicios", emoji:"🔧" },
+        { label:"Preguntas frecuentes", value:"faq", emoji:"❓" },
+        { label:"Hablar con un asesor", value:"asesor", emoji:"👤" }
+      ]);
+      chatStep = 'menu';
+      break;
+    default:
+      addBotMessage("No entendí. Por favor selecciona una opción.", [
+        { label:"Solicitar presupuesto", value:"presupuesto", emoji:"💰" },
+        { label:"Volver al menú", value:"volver_menu", emoji:"↩️" }
+      ]);
+      chatStep = 'menu';
+  }
+}
+
+function handleFaqChoice(value) {
+  if (value.indexOf('faq_') === 0) {
+    var idx = parseInt(value.split('_')[1]);
+    var faq = FAQ_ITEMS[idx];
+    if (faq) {
+      addBotMessage("📌 **" + faq.pregunta + "**\n\n" + faq.respuesta + "\n\n¿Necesitas algo más?", [
+        { label:"Otra pregunta", value:"faq", emoji:"❓" },
+        { label:"Solicitar presupuesto", value:"presupuesto", emoji:"💰" },
+        { label:"Volver al menú", value:"volver_menu", emoji:"↩️" }
+      ]);
+      chatStep = 'faq_answer';
+    }
+  } else {
+    handleMenuChoice(value);
+  }
+}
+
+function handleServiceSelect(value) {
+  var servicio = SERVICIOS.find(function(s) { return s.id === value; });
+  if (servicio) {
+    budget.servicio = servicio.id;
+    var unitLabel = servicio.unidad === 'm²' ? '¿Cuántos metros cuadrados (m²) aproximados necesitas?'
+      : servicio.unidad === 'ml' ? '¿Cuántos metros lineales aproximados necesitas?'
+      : '¿Cuántos proyectos/unidades necesitas? (escribe 1 si es un solo trabajo)';
+    addBotMessage("✅ **" + servicio.nombre + "** — " + formatCLP(servicio.precioBase) + "/" + servicio.unidad + "\n\n" + unitLabel + "\n\n💡 *Escribe un número aproximado, no te preocupes si no es exacto.*");
+    chatStep = 'ask_cantidad';
+  } else {
+    addBotMessage("No encontré ese servicio. Selecciona una opción de la lista:",
+      SERVICIOS.map(function(s) { return { label: s.icono + ' ' + s.nombre, value: s.id }; })
+    );
+  }
+}
+
+function handleCantidad(value) {
+  var num = parseFloat(value.replace(/[^\d.,]/g, '').replace(',', '.'));
+  if (isNaN(num) || num <= 0) {
+    addBotMessage("⚠️ Por favor ingresa un número válido mayor a 0. Por ejemplo: 25");
+    return;
+  }
+  budget.cantidad = num;
+  var servicio = SERVICIOS.find(function(s) { return s.id === budget.servicio; });
+  addBotMessage("📐 Perfecto, " + num + " " + (servicio ? servicio.unidad : 'unidades') + ".\n\n¿En qué comuna de Santiago se realizaría el trabajo?",
+    COMUNAS_SANTIAGO.slice(0, 8).map(function(c) { return { label: c, value: c }; })
+  );
+  chatStep = 'ask_comuna';
+}
+
+function handleComuna(value) {
+  budget.comuna = value;
+  addBotMessage("📍 **" + value + "**, anotado.\n\n¿Puedes darnos una breve descripción del trabajo que necesitas? Por ejemplo: \"remodelar cocina y baño\", \"construir segundo piso\", etc.");
+  chatStep = 'ask_descripcion';
+}
+
+function handleDescripcion(value) {
+  budget.descripcion = value;
+  addBotMessage("👤 ¿Cuál es tu nombre completo?");
+  chatStep = 'ask_nombre';
+}
+
+function handleNombre(value) {
+  budget.nombre = value;
+  addBotMessage("📱 ¿Tu número de teléfono? (para contactarte con el presupuesto)");
+  chatStep = 'ask_telefono';
+}
+
+function handleTelefono(value) {
+  budget.telefono = value;
+  addBotMessage("📧 Por último, ¿tu correo electrónico? (escribe 'no' si prefieres no darlo)");
+  chatStep = 'ask_email';
+}
+
+function handleEmail(value) {
+  var email = value.toLowerCase() === 'no' ? 'No proporcionado' : value;
+  budget.email = email;
+
+  var servicio = SERVICIOS.find(function(s) { return s.id === budget.servicio; });
+  if (!servicio) return;
+
+  var subtotal = servicio.precioBase * budget.cantidad;
+  var iva = Math.round(subtotal * 0.19);
+  var total = subtotal + iva;
+
+  var resumen =
+    "🧾 **PRESUPUESTO ESTIMADO**\n" +
+    "━━━━━━━━━━━━━━━━━━━━━━\n\n" +
+    "🔧 **Servicio:** " + servicio.nombre + "\n" +
+    "📐 **Cantidad:** " + budget.cantidad + " " + servicio.unidad + "\n" +
+    "💲 **Precio unitario:** " + formatCLP(servicio.precioBase) + "/" + servicio.unidad + "\n" +
+    "📍 **Comuna:** " + budget.comuna + "\n\n" +
+    "━━━━━━━━━━━━━━━━━━━━━━\n" +
+    "**Subtotal:** " + formatCLP(subtotal) + "\n" +
+    "**IVA (19%):** " + formatCLP(iva) + "\n" +
+    "**💰 TOTAL ESTIMADO: " + formatCLP(total) + "**\n" +
+    "━━━━━━━━━━━━━━━━━━━━━━\n\n" +
+    "👤 **Cliente:** " + budget.nombre + "\n" +
+    "📱 **Teléfono:** " + budget.telefono + "\n" +
+    "📧 **Email:** " + email + "\n" +
+    "📝 **Descripción:** " + budget.descripcion + "\n\n" +
+    "⚠️ *Este es un presupuesto estimado. El precio final puede variar según la visita técnica al lugar del proyecto.*\n\n" +
+    "¿Qué te gustaría hacer?";
+
+  addBotMessage(resumen, [
+    { label:"📞 Contactar por WhatsApp", value:"whatsapp", emoji:"📱" },
+    { label:"📧 Enviar por email", value:"email_budget", emoji:"📧" },
+    { label:"Nueva cotización", value:"nueva", emoji:"🔄" },
+    { label:"Volver al menú", value:"volver_menu", emoji:"↩️" }
+  ]);
+  chatStep = 'show_budget';
+}
+
+function handlePostBudget(value) {
+  switch (value) {
+    case 'whatsapp':
+      addBotMessage("📱 **WhatsApp aún no configurado.**\n\nPronto habilitaremos este canal. Por ahora puedes escribirnos a:\n📧 construcctorayservicios@gmail.com\n\n¿Algo más?", [
+        { label:"Nueva cotización", value:"nueva", emoji:"🔄" },
+        { label:"Volver al menú", value:"volver_menu", emoji:"↩️" }
+      ]);
+      chatStep = 'goodbye';
+      break;
+    case 'email_budget':
+      addBotMessage("📧 ¡Listo! Hemos registrado tu solicitud. Nuestro equipo te contactará al correo o teléfono que proporcionaste dentro de las próximas **24 horas hábiles** con un presupuesto detallado.\n\n¿Algo más?", [
+        { label:"Nueva cotización", value:"nueva", emoji:"🔄" },
+        { label:"Volver al menú", value:"volver_menu", emoji:"↩️" }
+      ]);
+      chatStep = 'goodbye';
+      break;
+    case 'nueva':
+      budget = { servicio:'', cantidad:0, nombre:'', telefono:'', email:'', descripcion:'', comuna:'' };
+      handleMenuChoice('presupuesto');
+      break;
+    default:
+      handleMenuChoice(value);
+  }
+}
+
+// ===== RESPONSIVE ADJUSTMENTS =====
+function handleResize() {
+  var w = window.innerWidth;
+  var hamburger = document.getElementById('hamburger-btn');
+  var desktopNav = document.getElementById('desktop-nav');
+  var portfolioGrid = document.getElementById('portfolio-grid');
+  var aboutGrid = document.querySelector('#nosotros .md\\:grid-cols-2');
+  var chatWin = document.getElementById('chat-window');
+
+  if (w >= 768) {
+    hamburger.style.display = 'none';
+    desktopNav.style.display = 'flex';
+    portfolioGrid.style.gridTemplateColumns = w >= 1024 ? 'repeat(4,1fr)' : 'repeat(3,1fr)';
+    // About grid 2 cols
+    var aboutParent = document.querySelectorAll('#nosotros > div > div');
+    if (aboutParent.length > 1) {
+      aboutParent[1].style.gridTemplateColumns = '1fr 1fr';
+    }
+    // Stats 4 cols
+    var statsGrid = document.querySelectorAll('#nosotros > div > div');
+    if (statsGrid.length > 2) {
+      statsGrid[2].style.gridTemplateColumns = 'repeat(4,1fr)';
+    }
+    // Contact grid
+    var contactGrid = document.querySelector('#contacto > div > div:last-child');
+  } else {
+    hamburger.style.display = 'block';
+    desktopNav.style.display = 'none';
+    portfolioGrid.style.gridTemplateColumns = 'repeat(2,1fr)';
+  }
+
+  // Chat window responsive
+  if (chatWin) {
+    if (w >= 768) {
+      chatWin.style.width = '24rem';
+      chatWin.style.height = '600px';
+      chatWin.style.maxHeight = '80vh';
+      chatWin.style.bottom = '1rem';
+      chatWin.style.right = '1rem';
+      chatWin.style.borderRadius = '0.75rem';
+    } else {
+      chatWin.style.width = '100%';
+      chatWin.style.height = '100%';
+      chatWin.style.maxHeight = '100%';
+      chatWin.style.bottom = '0';
+      chatWin.style.right = '0';
+      chatWin.style.borderRadius = '0';
+    }
+  }
+}
+
+// ===== INIT =====
+document.addEventListener('DOMContentLoaded', function() {
+  renderServices();
+  renderPortfolio();
+  renderFAQ();
+  handleResize();
+  window.addEventListener('resize', handleResize);
+});
 </script>
+
 </body>
 </html>
